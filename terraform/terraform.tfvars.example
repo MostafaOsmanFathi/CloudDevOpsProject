@@ -4,6 +4,13 @@
 aws_region   = "us-east-1"
 aws_profile  = ""
 
+# Credentials. Leave these empty to use the environment variables or
+# ~/.aws/credentials instead. terraform.tfvars is git ignored, so real keys
+# can be set here for a quick local run.
+aws_access_key    = ""
+aws_secret_key    = ""
+aws_session_token = ""
+
 project_name = "ivolve"
 environment  = "dev"
 

@@ -10,6 +10,27 @@ variable "aws_profile" {
   default     = ""
 }
 
+variable "aws_access_key" {
+  description = "AWS access key id. Leave empty to fall back to the environment variables or ~/.aws/credentials."
+  type        = string
+  default     = null
+  sensitive   = true
+}
+
+variable "aws_secret_key" {
+  description = "AWS secret access key. Leave empty to fall back to the environment variables or ~/.aws/credentials."
+  type        = string
+  default     = null
+  sensitive   = true
+}
+
+variable "aws_session_token" {
+  description = "AWS session token. Only needed for temporary credentials."
+  type        = string
+  default     = null
+  sensitive   = true
+}
+
 variable "project_name" {
   description = "Name prefix applied to every resource so the stack is easy to identify."
   type        = string

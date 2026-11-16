@@ -6,8 +6,8 @@
 mock_provider "aws" {
   mock_data "aws_ami" {
     defaults = {
-      id        = "ami-0123456789abcdef0"
-      image_id  = "ami-0123456789abcdef0"
+      id           = "ami-0123456789abcdef0"
+      image_id     = "ami-0123456789abcdef0"
       architecture = "x86_64"
     }
   }
