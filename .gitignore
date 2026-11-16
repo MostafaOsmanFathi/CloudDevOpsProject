@@ -1,0 +1,23 @@
+# Local environment overrides (may contain real secrets)
+.env
+
+# Editor / OS files
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Java / Maven
+target/
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
