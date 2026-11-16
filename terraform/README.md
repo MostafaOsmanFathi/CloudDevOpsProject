@@ -163,6 +163,30 @@ the IAM user. A scoped-down policy needs at least:
 }
 ```
 
+### Creating the IAM user and the access key
+
+In the AWS console: **IAM -> Users -> Create user** (name it `ivolve-devops`),
+attach the policy, then **Security credentials -> Create access key**. The
+secret is shown only once.
+
+With the CLI:
+
+```bash
+aws iam create-user --user-name ivolve-devops
+aws iam attach-user-policy --user-name ivolve-devops --policy-arn arn:aws:iam::aws:policy/AdministratorAccess
+aws iam create-access-key --user-name ivolve-devops --output json
+```
+
+Store the result in the shared credentials file:
+
+```bash
+aws-set-credentials
+```
+
+The helper reads the key id and the secret without echoing them, writes both the
+`[default]` and the `[ivolve]` profiles into `~/.aws/credentials` with `600`
+permissions and verifies the result with `aws sts get-caller-identity`.
+
 ---
 
 ## 3. Deployment
