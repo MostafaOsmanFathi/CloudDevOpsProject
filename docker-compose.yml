@@ -1,31 +1,6 @@
-# =============================================================================
-#  iVolve DevOps Project - Local Development Stack
-# -----------------------------------------------------------------------------
-#  Builds every microservice from its own Dockerfile and runs the whole
-#  application together with a local MySQL database.
-#
-#  Services
-#    frontend        Node.js / Express  -> http://localhost:3000
-#    auth-service    Python  / Flask    -> http://localhost:5000  (talks to MySQL)
-#    roadmap-service Java   / SpringBoot-> http://localhost:8080
-#    mysql           MySQL 8            -> localhost:3306  (database "ivolve")
-#
-#  Usage
-#    docker compose up --build -d      # build images and start the stack
-#    docker compose ps                 # check the health of every container
-#    docker compose logs -f frontend   # follow one service log
-#    docker compose down -v            # stop and delete the database volume
-#
-#  Every value can be overridden with an environment variable or with a local
-#  ".env" file (see .env.example).
-# =============================================================================
-
 name: ivolve-devops
 
 services:
-  # ---------------------------------------------------------------------------
-  # Database - MySQL 8 (only the auth service talks to the database)
-  # ---------------------------------------------------------------------------
   mysql:
     image: mysql:8.4
     container_name: ivolve-mysql
@@ -36,18 +11,11 @@ services:
       MYSQL_USER: ${MYSQL_USER:-ibrahim}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-pass@123}
     ports:
-      # Host -> container. Useful to connect with a local MySQL client.
       - "${MYSQL_PORT:-3306}:3306"
     volumes:
-      # Named volume so the "users" table survives `docker compose down`.
       - mysql-data:/var/lib/mysql
     healthcheck:
-      # The auth service only starts once MySQL really accepts connections.
-      test:
-        [
-          "CMD-SHELL",
-          "mysqladmin ping -h 127.0.0.1 -uroot -p\"$$MYSQL_ROOT_PASSWORD\" --silent",
-        ]
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p\"$$MYSQL_ROOT_PASSWORD\" --silent"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -55,9 +23,6 @@ services:
     networks:
       - ivolve-net
 
-  # ---------------------------------------------------------------------------
-  # Auth Service - Python / Flask (registration + login, bcrypt hashed)
-  # ---------------------------------------------------------------------------
   auth-service:
     build:
       context: ./src/auth-service
@@ -77,14 +42,7 @@ services:
       mysql:
         condition: service_healthy
     healthcheck:
-      # /health verifies the database connection and creates the "users" table.
-      test:
-        [
-          "CMD",
-          "python",
-          "-c",
-          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/health', timeout=5)",
-        ]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/health', timeout=5)"]
       interval: 10s
       timeout: 10s
       retries: 10
@@ -92,9 +50,6 @@ services:
     networks:
       - ivolve-net
 
-  # ---------------------------------------------------------------------------
-  # Roadmap Service - Java / Spring Boot (DevOps roadmap data)
-  # ---------------------------------------------------------------------------
   roadmap-service:
     build:
       context: ./src/roadmap-service
@@ -116,9 +71,6 @@ services:
     networks:
       - ivolve-net
 
-  # ---------------------------------------------------------------------------
-  # Frontend Service - Node.js / Express (EJS views, session based login)
-  # ---------------------------------------------------------------------------
   frontend:
     build:
       context: ./src/frontend
@@ -127,7 +79,6 @@ services:
     container_name: ivolve-frontend
     restart: unless-stopped
     environment:
-      # Service names are resolved by the compose network.
       AUTH_SERVICE_URL: http://auth-service:5000
       ROADMAP_SERVICE_URL: http://roadmap-service:8080
       SESSION_SECRET: ${SESSION_SECRET:-change-me-in-k8s}
@@ -147,16 +98,10 @@ services:
     networks:
       - ivolve-net
 
-# -----------------------------------------------------------------------------
-# Named volumes
-# -----------------------------------------------------------------------------
 volumes:
   mysql-data:
     driver: local
 
-# -----------------------------------------------------------------------------
-# Networks
-# -----------------------------------------------------------------------------
 networks:
   ivolve-net:
     driver: bridge
