@@ -1,7 +1,8 @@
 # CloudDevOpsProject
 
 Microservices DevOps training project (NTI x iVolve). The application source
-code lives in [`src/`](./src).
+code lives in [`src/`](./src), the AWS infrastructure in
+[`terraform/`](./terraform).
 
 | Service         | Technology               | Port |
 | --------------- | ------------------------ | ---- |
@@ -73,3 +74,25 @@ cp .env.example .env
 | `MYSQL_PASSWORD`    | `pass@123`     |
 | `MYSQL_ROOT_PASSWORD` | `rootpassword` |
 | `SESSION_SECRET`    | `change-me-in-k8s` |
+
+## Infrastructure provisioning (Terraform)
+
+The [`terraform/`](./terraform) directory holds the AWS modules for the network
+(VPC, public and private subnets, IGW, NAT, Network ACLs), the Jenkins server
+(EC2 + security group), the EKS cluster with two worker nodes in different
+availability zones, and the ECR repositories. The state is kept in an S3 bucket
+created by the `terraform/bootstrap` module.
+
+```bash
+# Phase 1 - remote state bucket and lock table
+terraform -chdir=terraform/bootstrap init && terraform -chdir=terraform/bootstrap apply
+
+# Phase 2 - infrastructure
+cd terraform
+cp backend.hcl.example backend.hcl    # paste the values from the bootstrap output
+terraform init -backend-config=backend.hcl
+terraform apply
+```
+
+Where to put the AWS credentials is documented in
+[`terraform/README.md`](./terraform/README.md#2-aws-authentication).

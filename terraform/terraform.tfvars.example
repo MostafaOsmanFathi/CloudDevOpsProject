@@ -1,0 +1,42 @@
+# Copy to terraform.tfvars and adjust. Never commit terraform.tfvars with
+# real credentials, it is ignored by git.
+
+aws_region   = "us-east-1"
+aws_profile  = ""
+
+project_name = "ivolve"
+environment  = "dev"
+
+# Lock this down to your own public IP.
+admin_cidr = "0.0.0.0/0"
+
+vpc_cidr             = "10.0.0.0/16"
+availability_zones   = ["us-east-1a", "us-east-1b"]
+public_subnet_cidrs  = ["10.0.0.0/24", "10.0.1.0/24"]
+private_subnet_cidrs = ["10.0.10.0/24", "10.0.11.0/24"]
+single_nat_gateway   = false
+
+# Jenkins server
+jenkins_instance_type    = "t3.medium"
+jenkins_ami_id           = ""
+jenkins_root_volume_size = 30
+# Name of an existing EC2 key pair, empty means keyless access through SSM.
+ssh_key_name = ""
+
+# EKS cluster
+eks_cluster_name            = "ivolve-eks"
+eks_kubernetes_version       = ""
+eks_endpoint_public_access  = true
+eks_endpoint_public_cidrs   = ["0.0.0.0/0"]
+eks_node_instance_types     = ["t3.medium"]
+eks_node_desired_size       = 1
+eks_node_min_size           = 1
+eks_node_max_size           = 2
+
+# ECR
+ecr_repository_names = ["frontend", "auth-service", "roadmap-service"]
+ecr_max_images       = 10
+
+tags = {
+  Owner = "devops-team"
+}
