@@ -1,0 +1,32 @@
+name: CI - auth-service
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "src/auth-service/**"
+      - ".github/workflows/auth-service.yml"
+      - ".github/workflows/ci-image.yml"
+  pull_request:
+    paths:
+      - "src/auth-service/**"
+      - ".github/workflows/auth-service.yml"
+      - ".github/workflows/ci-image.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: auth-service-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  image:
+    name: Build, scan and push the auth-service image
+    uses: ./.github/workflows/ci-image.yml
+    with:
+      service: auth-service
+      context: src/auth-service
+      image: ivolve-auth-service
+      push: ${{ github.event_name != 'pull_request' }}
+      update-manifests: ${{ github.event_name == 'push' }}
+    secrets: inherit

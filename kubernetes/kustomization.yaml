@@ -3,8 +3,12 @@ kind: Kustomization
 
 namespace: ivolve
 
-commonLabels:
-  app.kubernetes.io/part-of: ivolve-devops
+# The labels are added to the metadata only. The selector of a StatefulSet is
+# immutable, so it must never be changed by the transformer.
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: ivolve-devops
+    includeSelectors: false
 
 resources:
   - namespace.yaml

@@ -170,15 +170,26 @@ kubectl port-forward -n ivolve svc/frontend 3000:3000
 
 ## 7. Updating the image references
 
-The Jenkins pipeline updates the manifests before it pushes them to the
-repository:
+The Jenkins pipeline and the GitHub Actions workflow update the manifests
+before they push them to the repository. `kubectl set image --local` rewrites
+the image of the container without needing a cluster:
 
 ```bash
-kubectl -n ivolve set image deployment/frontend frontend=<account-id>.dkr.ecr.<region>.amazonaws.com/ivolve-frontend:<tag>
+kubectl set image --local \
+  -f frontend/deployment.yaml \
+  "frontend=123456789012.dkr.ecr.us-east-1.amazonaws.com/ivolve-frontend:<tag>" \
+  -o yaml > frontend/deployment.yaml.tmp
+mv frontend/deployment.yaml.tmp frontend/deployment.yaml
 ```
 
-Or with kustomize, which keeps the manifests in the repository in sync:
+Against a live cluster the same command works without `--local`:
 
 ```bash
-cd kubernetes && kustomize edit set image frontend=<account-id>.dkr.ecr.<region>.amazonaws.com/ivolve-frontend:<tag>
+kubectl -n ivolve set image deployment/frontend \
+  frontend=123456789012.dkr.ecr.us-east-1.amazonaws.com/ivolve-frontend:<tag>
 ```
+
+> `kustomize edit set image` does **not** work here. The transformer matches
+> on the full repository name, not on the short one, so the key would have to be
+> `123456789012.dkr.ecr.us-east-1.amazonaws.com/ivolve-frontend` and not
+> `frontend`.

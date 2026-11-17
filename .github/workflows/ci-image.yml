@@ -1,0 +1,189 @@
+name: Reusable - build, scan and push an image
+
+on:
+  workflow_call:
+    inputs:
+      service:
+        description: Name of the microservice, also the name of the container and of the deployment.
+        required: true
+        type: string
+      context:
+        description: Docker build context.
+        required: true
+        type: string
+      dockerfile:
+        description: Dockerfile, relative to the build context.
+        required: false
+        type: string
+        default: Dockerfile
+      image:
+        description: Name of the image in ECR, without the registry prefix.
+        required: true
+        type: string
+      push:
+        description: Push the image to ECR.
+        required: false
+        type: boolean
+        default: true
+      update-manifests:
+        description: Update the Kubernetes manifests and push them to the repository.
+        required: false
+        type: boolean
+        default: true
+      scan-severity:
+        description: Severities that make the scan fail.
+        required: false
+        type: string
+        default: CRITICAL,HIGH
+    secrets:
+      AWS_ACCESS_KEY_ID:
+        required: false
+      AWS_SECRET_ACCESS_KEY:
+        required: false
+      AWS_SESSION_TOKEN:
+        required: false
+      AWS_ROLE_ARN:
+        required: false
+      AWS_REGION:
+        required: false
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  build:
+    name: Build the image
+    runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.reference.outputs.image }}
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+
+      - name: Configure the AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ secrets.AWS_REGION || 'us-east-1' }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+
+      - name: Log in to the ECR registry
+        id: login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Compute the image reference
+        id: reference
+        run: |
+          echo "image=${{ steps.login.outputs.registry }}/${{ inputs.image }}:${{ github.sha }}" >> "$GITHUB_OUTPUT"
+
+      - name: Compute the image tags
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ steps.reference.outputs.image }}
+          tags: |
+            type=sha,format=long
+            type=raw,value=latest,enable=${{ inputs.push }}
+            type=ref,event=branch
+            type=ref,event=pr
+
+      - name: Build the image
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ inputs.context }}
+          file: ${{ inputs.context }}/${{ inputs.dockerfile }}
+          # push and load are mutually exclusive, exactly one of them is used.
+          push: ${{ inputs.push }}
+          load: ${{ !inputs.push }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=${{ inputs.service }}
+          cache-to: type=gha,mode=max,scope=${{ inputs.service }}
+
+  scan:
+    name: Scan the image with Trivy
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Configure the AWS credentials
+        if: ${{ inputs.push }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ secrets.AWS_REGION || 'us-east-1' }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+
+      - name: Log in to the ECR registry
+        if: ${{ inputs.push }}
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Pull the image that was pushed
+        if: ${{ inputs.push }}
+        run: docker pull ${{ needs.build.outputs.image }}
+
+      - name: Rebuild the image locally
+        if: ${{ !inputs.push }}
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ inputs.context }}
+          file: ${{ inputs.context }}/${{ inputs.dockerfile }}
+          push: false
+          load: true
+          tags: ${{ needs.build.outputs.image }}
+          cache-from: type=gha,scope=${{ inputs.service }}
+
+      - name: Scan the image
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: ${{ needs.build.outputs.image }}
+          format: table
+          severity: ${{ inputs.scan-severity }}
+          ignore-unfixed: true
+          exit-code: "1"
+
+  update-manifests:
+    name: Update the Kubernetes manifests
+    needs: [build, scan]
+    if: ${{ inputs.push && inputs.update-manifests }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: Point the deployment at the new image
+        run: |
+          manifest="kubernetes/${{ inputs.service }}/deployment.yaml"
+          kubectl set image --local -f "$manifest" \
+            "${{ inputs.service }}=${{ needs.build.outputs.image }}" \
+            -o yaml > "$manifest.tmp"
+          mv "$manifest.tmp" "$manifest"
+
+      - name: Commit and push the manifests
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "kubernetes/${{ inputs.service }}/deployment.yaml"
+          if git diff --cached --quiet; then
+            echo "The manifests are already up to date."
+            exit 0
+          fi
+          git commit -m "chore(k8s): update the ${{ inputs.service }} image to ${{ needs.build.outputs.image }}"
+          git push
