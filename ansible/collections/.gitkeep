@@ -1,0 +1,5 @@
+# The collections listed in requirements.yml are installed into this directory
+# with:
+#
+#   ansible-galaxy collection install -r requirements.yml
+#

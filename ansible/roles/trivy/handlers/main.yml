@@ -1,0 +1,11 @@
+---
+- name: Reload systemd
+  ansible.builtin.systemd_service:
+    daemon_reload: true
+
+- name: Restart the Trivy timer
+  ansible.builtin.systemd_service:
+    name: trivy-scan.timer
+    state: restarted
+    enabled: true
+    daemon_reload: true

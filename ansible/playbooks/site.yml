@@ -1,0 +1,33 @@
+---
+# Configures the Jenkins EC2 instance that the Terraform "server" module
+# creates. It installs Java, Docker, Trivy and the Jenkins controller.
+#
+#   ansible-playbook playbooks/site.yml
+#
+- name: Configure the Jenkins CI server
+  hosts: jenkins
+  become: true
+
+  pre_tasks:
+    - name: Wait for the SSH connection to be ready
+      ansible.builtin.wait_for_connection:
+        timeout: 300
+
+    - name: Gather the host facts
+      ansible.builtin.setup:
+
+  roles:
+    - role: base
+    - role: java
+    - role: docker
+    - role: trivy
+    - role: jenkins
+
+  post_tasks:
+    - name: Report the installed versions
+      ansible.builtin.debug:
+        msg:
+          - "Java: {{ java_version.stderr_lines[0] | default('unknown') }}"
+          - "Docker: {{ docker_version.stdout | default('unknown') }}"
+          - "Trivy: {{ trivy_version_output.stdout_lines[0] | default('unknown') }}"
+          - "Jenkins: http://{{ ansible_host }}:{{ jenkins_port }}"

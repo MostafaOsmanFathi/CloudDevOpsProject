@@ -1,0 +1,16 @@
+---
+base_packages:
+  - curl
+  - wget
+  - git
+  - tar
+  - unzip
+  - jq
+  - chrony
+  - ca-certificates
+  - python3-pip
+
+base_timezone: UTC
+
+base_chrony_service: "{{ 'chrony' if ansible_facts.os_family == 'Debian' else 'chronyd' }}"
+base_ssh_service: "{{ 'ssh' if ansible_facts.os_family == 'Debian' else 'sshd' }}"

@@ -1,0 +1,9 @@
+---
+- name: Restart Docker
+  ansible.builtin.service:
+    name: "{{ docker_service_name }}"
+    state: restarted
+
+- name: Update the package cache
+  ansible.builtin.package:
+    update_cache: true

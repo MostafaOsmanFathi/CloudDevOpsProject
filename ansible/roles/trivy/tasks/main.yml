@@ -1,0 +1,65 @@
+---
+- name: Check the CPU architecture
+  ansible.builtin.set_fact:
+    trivy_arch: "{{ '64-bit' if ansible_facts.architecture == 'x86_64' else 'arm64' }}"
+
+- name: Install the Trivy binary
+  ansible.builtin.unarchive:
+    src: "https://github.com/aquasecurity/trivy/releases/download/v{{ trivy_version }}/trivy_{{ trivy_version }}_Linux-{{ trivy_arch }}.tar.gz"
+    dest: /tmp
+    remote_src: true
+    extra_opts:
+      - trivy
+    creates: "{{ trivy_install_path }}"
+
+- name: Move the Trivy binary into place
+  ansible.builtin.copy:
+    src: /tmp/trivy
+    dest: "{{ trivy_install_path }}"
+    remote_src: true
+    mode: "0755"
+    owner: root
+    group: root
+
+- name: Install the image scan script
+  ansible.builtin.template:
+    src: trivy-scan.sh.j2
+    dest: "{{ trivy_scan_script }}"
+    mode: "0755"
+    owner: root
+    group: root
+
+- name: Install the Trivy systemd service
+  ansible.builtin.template:
+    src: trivy-scan.service.j2
+    dest: /etc/systemd/system/trivy-scan.service
+    mode: "0644"
+  notify:
+    - Reload systemd
+    - Restart the Trivy timer
+
+- name: Install the Trivy systemd timer
+  ansible.builtin.template:
+    src: trivy-scan.timer.j2
+    dest: /etc/systemd/system/trivy-scan.timer
+    mode: "0644"
+  notify:
+    - Reload systemd
+    - Restart the Trivy timer
+
+- name: Ensure the Trivy timer is enabled and running
+  ansible.builtin.systemd_service:
+    name: trivy-scan.timer
+    enabled: true
+    state: started
+    daemon_reload: true
+
+- name: Read the Trivy version
+  ansible.builtin.command:
+    cmd: "{{ trivy_install_path }} --version"
+  register: trivy_version_output
+  changed_when: false
+
+- name: Report the Trivy version
+  ansible.builtin.debug:
+    msg: "{{ trivy_version_output.stdout_lines[0] }}"

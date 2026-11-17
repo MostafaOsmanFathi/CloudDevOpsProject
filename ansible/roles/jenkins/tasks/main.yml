@@ -1,0 +1,91 @@
+---
+- name: Install Jenkins on RedHat based systems
+  when: ansible_facts.os_family == 'RedHat'
+  block:
+    - name: Import the Jenkins signing key
+      ansible.builtin.rpm_key:
+        key: https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
+        state: present
+
+    - name: Install the Jenkins repository definition
+      ansible.builtin.get_url:
+        url: https://pkg.jenkins.io/redhat-stable/jenkins.repo
+        dest: /etc/yum.repos.d/jenkins.repo
+        mode: "0644"
+      notify: Update the package cache
+
+    - name: Install Jenkins
+      ansible.builtin.package:
+        name: jenkins
+        state: present
+      notify: Restart Jenkins
+
+- name: Install Jenkins on Debian based systems
+  when: ansible_facts.os_family == 'Debian'
+  block:
+    - name: Install the Jenkins repository key
+      ansible.builtin.get_url:
+        url: https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+        dest: /tmp/jenkins.io-2023.key
+        mode: "0644"
+
+    - name: Convert the Jenkins key to binary format
+      ansible.builtin.command:
+        cmd: gpg --dearmor --yes -o /etc/apt/keyrings/jenkins.gpg /tmp/jenkins.io-2023.key
+        creates: /etc/apt/keyrings/jenkins.gpg
+
+    - name: Install the Jenkins repository definition
+      ansible.builtin.copy:
+        content: |
+          deb [signed-by=/etc/apt/keyrings/jenkins.gpg] https://pkg.jenkins.io/debian-stable binary/
+        dest: /etc/apt/sources.list.d/jenkins.list
+        mode: "0644"
+      notify: Update the package cache
+
+    - name: Install Jenkins
+      ansible.builtin.package:
+        name: jenkins
+        state: present
+      notify: Restart Jenkins
+
+- name: Ensure Jenkins is enabled and running
+  ansible.builtin.service:
+    name: "{{ jenkins_service_name }}"
+    state: started
+    enabled: true
+
+- name: Wait for Jenkins to listen on its port
+  ansible.builtin.wait_for:
+    port: "{{ jenkins_port }}"
+    host: 127.0.0.1
+    timeout: 300
+    delay: 10
+
+- name: Read the initial admin password
+  ansible.builtin.command:
+    cmd: cat "{{ jenkins_home }}/secrets/initialAdminPassword"
+  register: jenkins_initial_password
+  changed_when: false
+  no_log: true
+
+- name: Store the initial admin password for the lab
+  ansible.builtin.copy:
+    content: "{{ jenkins_initial_password.stdout }}\n"
+    dest: "{{ jenkins_admin_password_file }}"
+    mode: "0600"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    force: false
+
+- name: Collect the service facts
+  ansible.builtin.service_facts:
+
+- name: Read the Jenkins state
+  ansible.builtin.set_fact:
+    jenkins_state: "{{ ansible_facts.services[jenkins_service_name ~ '.service'].state | default('unknown') }}"
+
+- name: Report the Jenkins status
+  ansible.builtin.debug:
+    msg:
+      - "Jenkins is {{ jenkins_state }} on port {{ jenkins_port }}"
+      - "The initial admin password is stored in {{ jenkins_admin_password_file }}"

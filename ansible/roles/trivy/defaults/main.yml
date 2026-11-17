@@ -1,0 +1,7 @@
+---
+trivy_version: "0.58.2"
+trivy_install_path: /usr/local/bin/trivy
+trivy_scan_script: /usr/local/bin/trivy-scan.sh
+trivy_scan_schedule: daily
+trivy_severity: CRITICAL,HIGH
+trivy_report_dir: /var/lib/trivy-reports

@@ -1,0 +1,13 @@
+[Unit]
+Description=Trivy scan of the local Docker images
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+ExecStart={{ trivy_scan_script }}
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

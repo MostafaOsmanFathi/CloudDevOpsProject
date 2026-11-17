@@ -2,7 +2,8 @@
 
 Microservices DevOps training project (NTI x iVolve). The application source
 code lives in [`src/`](./src), the AWS infrastructure in
-[`terraform/`](./terraform).
+[`terraform/`](./terraform) and the server configuration in
+[`ansible/`](./ansible).
 
 | Service         | Technology               | Port |
 | --------------- | ------------------------ | ---- |
@@ -96,3 +97,18 @@ terraform apply
 
 Where to put the AWS credentials is documented in
 [`terraform/README.md`](./terraform/README.md#2-aws-authentication).
+
+## Server configuration (Ansible)
+
+The [`ansible/`](./ansible) directory holds the roles that configure the Jenkins
+EC2 instance: Java, Jenkins, Docker and Trivy. The inventory is dynamic and
+reads the running instances from AWS using the tags that Terraform sets on
+them.
+
+```bash
+cd ansible
+ansible-galaxy collection install -r requirements.yml
+ansible-playbook playbooks/site.yml
+```
+
+Details are in [`ansible/README.md`](./ansible/README.md).

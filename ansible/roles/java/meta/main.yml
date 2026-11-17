@@ -1,0 +1,22 @@
+---
+galaxy_info:
+  role_name: java
+  author: devops-team
+  description: Installs the Java runtime that Jenkins needs
+  license: MIT
+  min_ansible_version: "2.14"
+  platforms:
+    - name: EL
+      versions:
+        - "9"
+        - "8"
+    - name: Fedora
+      versions:
+        - all
+    - name: Debian
+      versions:
+        - all
+  galaxy_tags:
+    - java
+    - jenkins
+dependencies: []

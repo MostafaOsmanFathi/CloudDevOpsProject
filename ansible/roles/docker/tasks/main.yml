@@ -1,0 +1,68 @@
+---
+- name: Install Docker on RedHat based systems
+  when: ansible_facts.os_family == 'RedHat'
+  block:
+    - name: Install the repository key
+      ansible.builtin.rpm_key:
+        key: "https://download.docker.com/linux/{{ docker_repo_distro }}/gpg"
+        state: present
+
+    - name: Install the repository definition
+      ansible.builtin.get_url:
+        url: "https://download.docker.com/linux/{{ docker_repo_distro }}/docker-ce.repo"
+        dest: /etc/yum.repos.d/docker-ce.repo
+        mode: "0644"
+      notify: Update the package cache
+
+    - name: Install Docker and the plugins
+      ansible.builtin.package:
+        name: "{{ docker_packages }}"
+        state: present
+      notify: Restart Docker
+
+- name: Install Docker on Debian based systems
+  when: ansible_facts.os_family == 'Debian'
+  block:
+    - name: Install the repository key
+      ansible.builtin.get_url:
+        url: "https://download.docker.com/linux/{{ docker_repo_distro }}/gpg"
+        dest: /etc/apt/keyrings/docker.asc
+        mode: "0644"
+
+    - name: Install the repository definition
+      ansible.builtin.copy:
+        content: |
+          deb [arch={{ 'amd64' if ansible_facts.architecture == 'x86_64' else 'arm64' }} signed-by=/etc/apt/keyrings/docker.asc]
+          https://download.docker.com/linux/{{ docker_repo_distro }} {{ ansible_facts.distribution_release }} stable
+        dest: /etc/apt/sources.list.d/docker.list
+        mode: "0644"
+      notify: Update the package cache
+
+    - name: Install Docker and the plugins
+      ansible.builtin.package:
+        name: "{{ docker_packages }}"
+        state: present
+      notify: Restart Docker
+
+- name: Ensure Docker is enabled and running
+  ansible.builtin.service:
+    name: "{{ docker_service_name }}"
+    state: started
+    enabled: true
+
+- name: Add the deploy users to the Docker group
+  ansible.builtin.user:
+    name: "{{ item }}"
+    groups: docker
+    append: true
+  loop: "{{ docker_users }}"
+
+- name: Read the Docker version
+  ansible.builtin.command:
+    cmd: docker --version
+  register: docker_version
+  changed_when: false
+
+- name: Report the Docker version
+  ansible.builtin.debug:
+    msg: "{{ docker_version.stdout }}"

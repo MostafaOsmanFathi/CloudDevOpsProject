@@ -1,0 +1,10 @@
+---
+java_package: >-
+  {{ 'openjdk-21-jre-headless'
+     if ansible_facts.os_family == 'Debian'
+     else 'java-21-amazon-corretto-headless' }}
+
+java_home: >-
+  {{ '/usr/lib/jvm/java-21-openjdk'
+     if ansible_facts.os_family == 'Debian'
+     else '/usr/lib/jvm/java-21-amazon-corretto' }}

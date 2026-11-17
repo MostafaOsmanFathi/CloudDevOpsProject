@@ -1,0 +1,16 @@
+# Ansible caches
+.facts_cache
+.inventory_cache
+*.retry
+
+# Collections installed locally with ansible-galaxy
+collections/*
+!collections/.gitkeep
+
+# Local variable files that may hold secrets
+inventory/*.local.yml
+inventory/vault/
+*.vault
+
+# Generated reports
+trivy-reports/

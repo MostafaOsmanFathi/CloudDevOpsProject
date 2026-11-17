@@ -1,0 +1,11 @@
+[Unit]
+Description=Schedule the Trivy image scan
+Requires=trivy-scan.service
+
+[Timer]
+OnCalendar={{ trivy_scan_schedule }}
+Persistent=true
+RandomizedDelaySec=300
+
+[Install]
+WantedBy=timers.target

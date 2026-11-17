@@ -1,0 +1,24 @@
+---
+- name: Install Java
+  ansible.builtin.package:
+    name: "{{ java_package }}"
+    state: present
+    update_cache: true
+
+- name: Set JAVA_HOME for the shell
+  ansible.builtin.copy:
+    content: |
+      export JAVA_HOME="{{ java_home }}"
+      export PATH="$JAVA_HOME/bin:$PATH"
+    dest: /etc/profile.d/java.sh
+    mode: "0644"
+
+- name: Read the Java version
+  ansible.builtin.command:
+    cmd: java -version
+  register: java_version
+  changed_when: false
+
+- name: Report the Java version
+  ansible.builtin.debug:
+    msg: "{{ java_version.stderr_lines[0] }}"

@@ -1,0 +1,22 @@
+galaxy_info:
+  role_name: trivy
+  author: devops-team
+  description: Installs Trivy and schedules a daily scan of the local images
+  license: MIT
+  min_ansible_version: "2.14"
+  platforms:
+    - name: EL
+      versions:
+        - "9"
+        - "8"
+    - name: Fedora
+      versions:
+        - all
+    - name: Debian
+      versions:
+        - all
+  galaxy_tags:
+    - security
+    - trivy
+    - jenkins
+dependencies: []

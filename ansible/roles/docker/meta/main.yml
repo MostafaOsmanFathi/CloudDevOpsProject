@@ -1,0 +1,22 @@
+---
+galaxy_info:
+  role_name: docker
+  author: devops-team
+  description: Installs Docker and the Compose plugin used by the CI pipelines
+  license: MIT
+  min_ansible_version: "2.14"
+  platforms:
+    - name: EL
+      versions:
+        - "9"
+        - "8"
+    - name: Fedora
+      versions:
+        - all
+    - name: Debian
+      versions:
+        - all
+  galaxy_tags:
+    - docker
+    - jenkins
+dependencies: []

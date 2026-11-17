@@ -1,0 +1,19 @@
+---
+# Variables shared by every host.
+project_name: ivolve
+environment: dev
+aws_region: us-east-1
+
+# Remote user of the Amazon Linux instances created by Terraform.
+ansible_user: ec2-user
+
+# The Jenkins server is reached over SSH. The key comes from the EC2 key pair
+# or from an SSM session manager tunnel. The path can also be passed without
+# editing this file:
+#
+#   export ANSIBLE_PRIVATE_KEY_FILE=~/.ssh/ivolve-jenkins.pem
+#
+ansible_ssh_private_key_file: "{{ lookup('env', 'ANSIBLE_PRIVATE_KEY_FILE') | default('', true) }}"
+
+# Everything that belongs to a single role (package names, versions, paths)
+# lives in the defaults of that role.

@@ -1,0 +1,11 @@
+# Static inventory used for a syntax check and for running the playbooks
+# against a local or manually prepared host.
+#
+#   ansible-playbook -i inventory/localhost.yml playbooks/site.yml --check
+#
+[jenkins]
+# Fill in the public IP of the instance created by Terraform:
+# ansible-jenkins ansible_host=54.10.0.1 ansible_user=ec2-user
+
+[all:vars]
+ansible_python_interpreter=/usr/bin/python3

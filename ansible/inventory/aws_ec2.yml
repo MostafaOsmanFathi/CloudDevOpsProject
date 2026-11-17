@@ -1,0 +1,49 @@
+# Dynamic inventory that reads the running EC2 instances straight from AWS.
+#
+# It relies on the tags that the Terraform "server" module puts on the
+# Jenkins instance:
+#
+#   Role    = jenkins
+#   Project = ivolve
+#   Name    = ivolve-jenkins-server
+#
+# The amazon.aws collection has to be installed first:
+#
+#   ansible-galaxy collection install -r requirements.yml
+#
+plugin: amazon.aws.aws_ec2
+
+regions:
+  - "{{ aws_region | default('us-east-1') }}"
+
+# Only the instances that Terraform created and tagged for this project.
+filters:
+  tag:Role: jenkins
+  tag:Project: "{{ project_name | default('ivolve') }}"
+  instance-state-name: running
+
+# Prefer the public name so the playbook can reach the instance over SSH.
+hostnames:
+  - dns-name
+  - private-dns-name
+  - ip-address
+
+compose:
+  ansible_host: public_dns_name
+  ansible_user: ec2-user
+  ansible_port: 22
+
+# Group the instances by tag so the playbooks can target them by name.
+groups:
+  jenkins: "'Role' == 'jenkins'"
+  all: "'Role' == 'jenkins'"
+
+# Cache the inventory for 60 seconds so repeated playbook runs are fast.
+cache: True
+cache_plugin: jsonfile
+cache_timeout: 60
+cache_connection: .inventory_cache
+
+# The plugin needs credentials. It picks them up from the environment, from
+# ~/.aws/credentials or from the profile set below.
+# aws_profile: ivolve

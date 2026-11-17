@@ -1,0 +1,13 @@
+---
+# Only the Jenkins controller and Java, without Docker and Trivy.
+# Useful to re-install Jenkins without touching the rest of the server.
+#
+#   ansible-playbook playbooks/jenkins.yml
+#
+- name: Install the Jenkins controller
+  hosts: jenkins
+  become: true
+
+  roles:
+    - role: java
+    - role: jenkins

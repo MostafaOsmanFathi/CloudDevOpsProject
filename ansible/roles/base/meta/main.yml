@@ -1,0 +1,22 @@
+---
+galaxy_info:
+  role_name: base
+  author: devops-team
+  description: Base packages and system settings for the Jenkins server
+  license: MIT
+  min_ansible_version: "2.14"
+  platforms:
+    - name: EL
+      versions:
+        - "9"
+        - "8"
+    - name: Fedora
+      versions:
+        - all
+    - name: Debian
+      versions:
+        - all
+  galaxy_tags:
+    - devops
+    - jenkins
+dependencies: []
