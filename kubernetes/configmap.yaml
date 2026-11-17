@@ -1,0 +1,34 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ivolve-config
+  namespace: ivolve
+  labels:
+    app.kubernetes.io/part-of: ivolve-devops
+data:
+  # Images pushed by the Jenkins pipeline to the ECR repositories created by
+  # Terraform. The pipeline replaces the account id and the tag when it
+  # updates the manifests.
+  FRONTEND_IMAGE: "123456789012.dkr.ecr.us-east-1.amazonaws.com/ivolve-frontend:latest"
+  AUTH_SERVICE_IMAGE: "123456789012.dkr.ecr.us-east-1.amazonaws.com/ivolve-auth-service:latest"
+  ROADMAP_SERVICE_IMAGE: "123456789012.dkr.ecr.us-east-1.amazonaws.com/ivolve-roadmap-service:latest"
+
+  # Frontend
+  FRONTEND_PORT: "3000"
+  AUTH_SERVICE_URL: "http://auth-service.ivolve.svc.cluster.local:5000"
+  ROADMAP_SERVICE_URL: "http://roadmap-service.ivolve.svc.cluster.local:8080"
+
+  # Auth service
+  AUTH_SERVICE_PORT: "5000"
+  DB_HOST: "mysql.ivolve.svc.cluster.local"
+  DB_PORT: "3306"
+  DB_NAME: "ivolve"
+
+  # Roadmap service
+  ROADMAP_SERVICE_PORT: "8080"
+  SERVER_PORT: "8080"
+
+  # MySQL
+  MYSQL_DATABASE: "ivolve"
+  MYSQL_USER: "ibrahim"
+  MYSQL_PORT: "3306"

@@ -1,0 +1,111 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service
+  namespace: ivolve
+  labels:
+    app.kubernetes.io/name: auth-service
+    app.kubernetes.io/part-of: ivolve-devops
+spec:
+  replicas: 2
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: auth-service
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: auth-service
+        app.kubernetes.io/part-of: ivolve-devops
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: auth-service
+      containers:
+        - name: auth-service
+          image: 123456789012.dkr.ecr.us-east-1.amazonaws.com/ivolve-auth-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 5000
+              protocol: TCP
+          env:
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: ivolve-config
+                  key: DB_HOST
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: ivolve-config
+                  key: DB_PORT
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: ivolve-config
+                  key: DB_NAME
+            - name: DB_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: ivolve-config
+                  key: MYSQL_USER
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ivolve-secret
+                  key: MYSQL_PASSWORD
+          # The readiness probe uses the health endpoint, it verifies the
+          # database connection as well. The liveness probe only checks that
+          # the process is still answering, so a database outage does not
+          # trigger a restart loop.
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+          livenessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 4
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}

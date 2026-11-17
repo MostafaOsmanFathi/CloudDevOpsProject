@@ -2,8 +2,9 @@
 
 Microservices DevOps training project (NTI x iVolve). The application source
 code lives in [`src/`](./src), the AWS infrastructure in
-[`terraform/`](./terraform) and the server configuration in
-[`ansible/`](./ansible).
+[`terraform/`](./terraform), the server configuration in
+[`ansible/`](./ansible) and the Kubernetes manifests in
+[`kubernetes/`](./kubernetes).
 
 | Service         | Technology               | Port |
 | --------------- | ------------------------ | ---- |
@@ -112,3 +113,16 @@ ansible-playbook playbooks/site.yml
 ```
 
 Details are in [`ansible/README.md`](./ansible/README.md).
+
+## Container orchestration (Kubernetes)
+
+The [`kubernetes/`](./kubernetes) directory holds the manifests for the
+`ivolve` namespace: a Deployment and a Service per microservice, a MySQL
+StatefulSet with a headless service and a StorageClass, the ConfigMap and the
+Secret with the environment variables, and an Ingress for the frontend.
+
+```bash
+kubectl apply -k kubernetes/
+```
+
+Details are in [`kubernetes/README.md`](./kubernetes/README.md).

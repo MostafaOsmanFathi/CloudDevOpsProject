@@ -1,0 +1,100 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: ivolve
+  labels:
+    app.kubernetes.io/name: frontend
+    app.kubernetes.io/part-of: ivolve-devops
+spec:
+  replicas: 2
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: frontend
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: frontend
+        app.kubernetes.io/part-of: ivolve-devops
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: frontend
+      containers:
+        - name: frontend
+          image: 123456789012.dkr.ecr.us-east-1.amazonaws.com/ivolve-frontend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          env:
+            - name: AUTH_SERVICE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: ivolve-config
+                  key: AUTH_SERVICE_URL
+            - name: ROADMAP_SERVICE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: ivolve-config
+                  key: ROADMAP_SERVICE_URL
+            - name: SESSION_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: ivolve-secret
+                  key: SESSION_SECRET
+          # The root page renders the login form, it does not call the backend
+          # services, so the probe stays green even if they are down.
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 4
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}

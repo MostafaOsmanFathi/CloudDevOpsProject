@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: roadmap-service
+  namespace: ivolve
+  labels:
+    app.kubernetes.io/name: roadmap-service
+    app.kubernetes.io/part-of: ivolve-devops
+spec:
+  replicas: 2
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: roadmap-service
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: roadmap-service
+        app.kubernetes.io/part-of: ivolve-devops
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: roadmap-service
+      containers:
+        - name: roadmap-service
+          image: 123456789012.dkr.ecr.us-east-1.amazonaws.com/ivolve-roadmap-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+            - name: SERVER_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: ivolve-config
+                  key: SERVER_PORT
+          # Spring Boot needs a moment before it answers, the startup probe
+          # covers the JVM boot without killing the pod too early.
+          startupProbe:
+            httpGet:
+              path: /api/roadmap
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /api/roadmap
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+          livenessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 4
+          resources:
+            requests:
+              cpu: 200m
+              memory: 384Mi
+            limits:
+              cpu: "1"
+              memory: 768Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}

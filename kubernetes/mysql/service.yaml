@@ -1,0 +1,21 @@
+# Headless service that governs the MySQL StatefulSet. A headless service has
+# no cluster IP, the DNS records point straight at the pods, which gives the
+# database a stable network identity: mysql.ivolve.svc.cluster.local
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  namespace: ivolve
+  labels:
+    app.kubernetes.io/name: mysql
+    app.kubernetes.io/part-of: ivolve-devops
+spec:
+  clusterIP: None
+  publishNotReadyAddresses: true
+  selector:
+    app.kubernetes.io/name: mysql
+  ports:
+    - name: mysql
+      port: 3306
+      targetPort: 3306
+      protocol: TCP
