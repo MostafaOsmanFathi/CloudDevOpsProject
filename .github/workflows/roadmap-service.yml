@@ -22,6 +22,11 @@ concurrency:
 jobs:
   image:
     name: Build, scan and push the roadmap-service image
+    # The reusable workflow's update-manifests job needs contents: write.
+    # Called workflows may only keep or reduce the caller's permissions, so
+    # the caller has to grant it explicitly (repo default is read-only).
+    permissions:
+      contents: write
     uses: ./.github/workflows/ci-image.yml
     with:
       service: roadmap-service

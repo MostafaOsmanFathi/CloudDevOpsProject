@@ -47,8 +47,11 @@ helm upgrade --install aws-ebs-csi-driver aws-ebs-csi-driver/aws-ebs-csi-driver 
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/aws/deploy.yaml
 ```
 
-The worker nodes pull the images from the private ECR repositories with their
-own IAM role, so no `imagePullSecret` is needed.
+The images come from the Docker Hub repositories under the
+`mostafaosmanfathi` account. If the repositories are public, no
+`imagePullSecret` is needed; if they are private, create one as described in
+[`.github/README.md`](../.github/README.md#3-first-run) and reference it from
+each Deployment.
 
 ## 3. Applying the manifests
 
@@ -79,9 +82,9 @@ the `ivolve` namespace.
 | `ConfigMap/ivolve-config` | Image references, service URLs, ports, database name and user |
 | `Secret/ivolve-secret` | `MYSQL_ROOT_PASSWORD`, `MYSQL_PASSWORD` and `SESSION_SECRET` |
 
-The ConfigMap holds the image references as well, which is what the Jenkins
-pipeline reads when it updates the manifests. The actual `image:` field of a
-container can not be templated, so the pipeline uses `kubectl set image`.
+The ConfigMap holds the image references as well, which is what the image CI
+reads when it updates the manifests. The actual `image:` field of a container
+can not be templated, so the pipeline uses `kubectl set image`.
 
 The Secret uses `stringData`, so the values are readable in the file. Replace
 them before a real deployment:
@@ -114,9 +117,9 @@ Every microservice has a `Deployment` with two replicas and a `ClusterIP`
 
 | Service | Port | Image |
 | ------- | ---- | ----- |
-| `frontend` | 3000 | `ivolve-frontend` |
-| `auth-service` | 5000 | `ivolve-auth-service` |
-| `roadmap-service` | 8080 | `ivolve-roadmap-service` |
+| `frontend` | 3000 | `mostafaosmanfathi/frontend` |
+| `auth-service` | 5000 | `mostafaosmanfathi/auth-service` |
+| `roadmap-service` | 8080 | `mostafaosmanfathi/roadmap-service` |
 
 The replicas are spread over the availability zones with a
 `topologySpreadConstraints` on `topology.kubernetes.io/zone`, which matches the
@@ -170,14 +173,14 @@ kubectl port-forward -n ivolve svc/frontend 3000:3000
 
 ## 7. Updating the image references
 
-The Jenkins pipeline and the GitHub Actions workflow update the manifests
-before they push them to the repository. `kubectl set image --local` rewrites
-the image of the container without needing a cluster:
+The GitHub Actions image CI updates the manifests before it pushes them to the
+repository. `kubectl set image --local` rewrites the image of the container
+without needing a cluster:
 
 ```bash
 kubectl set image --local \
   -f frontend/deployment.yaml \
-  "frontend=123456789012.dkr.ecr.us-east-1.amazonaws.com/ivolve-frontend:<tag>" \
+  "frontend=mostafaosmanfathi/frontend:<tag>" \
   -o yaml > frontend/deployment.yaml.tmp
 mv frontend/deployment.yaml.tmp frontend/deployment.yaml
 ```
@@ -186,10 +189,9 @@ Against a live cluster the same command works without `--local`:
 
 ```bash
 kubectl -n ivolve set image deployment/frontend \
-  frontend=123456789012.dkr.ecr.us-east-1.amazonaws.com/ivolve-frontend:<tag>
+  frontend=mostafaosmanfathi/frontend:<tag>
 ```
 
 > `kustomize edit set image` does **not** work here. The transformer matches
 > on the full repository name, not on the short one, so the key would have to be
-> `123456789012.dkr.ecr.us-east-1.amazonaws.com/ivolve-frontend` and not
-> `frontend`.
+> `mostafaosmanfathi/frontend` and not `frontend`.

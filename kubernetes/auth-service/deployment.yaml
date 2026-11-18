@@ -39,7 +39,7 @@ spec:
               app.kubernetes.io/name: auth-service
       containers:
         - name: auth-service
-          image: 123456789012.dkr.ecr.us-east-1.amazonaws.com/ivolve-auth-service:latest
+          image: mostafaosmanfathi/auth-service:latest
           imagePullPolicy: IfNotPresent
           ports:
             - name: http

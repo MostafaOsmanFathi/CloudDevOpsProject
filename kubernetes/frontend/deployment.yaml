@@ -39,7 +39,7 @@ spec:
               app.kubernetes.io/name: frontend
       containers:
         - name: frontend
-          image: 123456789012.dkr.ecr.us-east-1.amazonaws.com/ivolve-frontend:latest
+          image: mostafaosmanfathi/frontend:latest
           imagePullPolicy: IfNotPresent
           ports:
             - name: http

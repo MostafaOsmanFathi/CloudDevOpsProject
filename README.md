@@ -130,14 +130,16 @@ Details are in [`kubernetes/README.md`](./kubernetes/README.md).
 ## Continuous integration (GitHub Actions)
 
 The [`.github/workflows`](./.github/workflows) directory holds the workflows
-that build, scan with Trivy and push the microservice images to ECR, plus a
-validation workflow that checks the Terraform, the Ansible, the manifests and
-the Docker Compose stack on every pull request.
+that build, scan with Trivy and push the microservice images to Docker Hub
+under the `mostafaosmanfathi` namespace, plus a validation workflow that checks
+the Terraform, the Ansible, the manifests and the Docker Compose stack on every
+pull request.
 
 ```bash
 # The reusable workflow is called by frontend.yml, auth-service.yml
-# and roadmap-service.yml. The AWS credentials are read from the
-# repository secrets AWS_ROLE_ARN or AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY.
+# and roadmap-service.yml. The two repository secrets are
+# DOCKERHUB_USERNAME and DOCKERHUB_TOKEN (a Docker Hub access token).
 ```
 
-Details are in [`.github/README.md`](./.github/README.md).
+Details, including how to add the secrets and create the Docker Hub
+repositories, are in [`.github/README.md`](./.github/README.md).

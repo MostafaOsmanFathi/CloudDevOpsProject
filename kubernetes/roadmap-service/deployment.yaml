@@ -39,7 +39,7 @@ spec:
               app.kubernetes.io/name: roadmap-service
       containers:
         - name: roadmap-service
-          image: 123456789012.dkr.ecr.us-east-1.amazonaws.com/ivolve-roadmap-service:latest
+          image: mostafaosmanfathi/roadmap-service:latest
           imagePullPolicy: IfNotPresent
           ports:
             - name: http

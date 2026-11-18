@@ -6,12 +6,12 @@ metadata:
   labels:
     app.kubernetes.io/part-of: ivolve-devops
 data:
-  # Images pushed by the Jenkins pipeline to the ECR repositories created by
-  # Terraform. The pipeline replaces the account id and the tag when it
-  # updates the manifests.
-  FRONTEND_IMAGE: "123456789012.dkr.ecr.us-east-1.amazonaws.com/ivolve-frontend:latest"
-  AUTH_SERVICE_IMAGE: "123456789012.dkr.ecr.us-east-1.amazonaws.com/ivolve-auth-service:latest"
-  ROADMAP_SERVICE_IMAGE: "123456789012.dkr.ecr.us-east-1.amazonaws.com/ivolve-roadmap-service:latest"
+  # Images pushed by GitHub Actions to the Docker Hub repositories under the
+  # mostafaosmanfathi namespace. The deployment images themselves are updated
+  # by the image CI, this ConfigMap is the reference used by the pipelines.
+  FRONTEND_IMAGE: "mostafaosmanfathi/frontend:latest"
+  AUTH_SERVICE_IMAGE: "mostafaosmanfathi/auth-service:latest"
+  ROADMAP_SERVICE_IMAGE: "mostafaosmanfathi/roadmap-service:latest"
 
   # Frontend
   FRONTEND_PORT: "3000"
