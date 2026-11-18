@@ -14,9 +14,12 @@ requests the images are built and scanned but not pushed (no credentials are
 needed). Every image gets a `latest` tag and a `sha-<commit>` tag.
 
 Steps per image: `docker build` -> Trivy scan -> `docker push`. The scan runs
-on the locally built image before the push, so a failing scan never publishes
-anything. It fails on fixable `CRITICAL`/`HIGH` vulnerabilities in OS and
-library packages; Trivy caches its vulnerability database automatically.
+on the locally built image, before the push. It reports fixable
+`CRITICAL`/`HIGH` vulnerabilities in OS and library packages; Trivy caches its
+vulnerability database automatically. The scan is currently report-only
+(`exit-code: '0'`) because the existing base images/dependencies have known
+findings. Set `exit-code: '1'` in `image-ci.yml` to make it a hard gate once
+those are fixed.
 
 ## Repository secrets
 
