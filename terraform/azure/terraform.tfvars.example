@@ -6,7 +6,7 @@ tenant_id       = ""
 client_id       = ""
 # client_secret  = ""   # or use ARM_CLIENT_SECRET
 
-location            = "East US"
+location            = "France Central"
 project_name        = "ivolve"
 environment         = "dev"
 resource_group_name = ""

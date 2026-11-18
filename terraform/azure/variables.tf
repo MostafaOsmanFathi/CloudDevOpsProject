@@ -26,7 +26,7 @@ variable "client_secret" {
 variable "location" {
   description = "Azure region where the infrastructure is created."
   type        = string
-  default     = "East US"
+  default     = "France Central"
 }
 
 variable "project_name" {
