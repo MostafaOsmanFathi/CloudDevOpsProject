@@ -1,0 +1,53 @@
+name: Build, scan and push images
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service: [frontend, auth-service, roadmap-service]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: docker.io
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build the image
+        run: |
+          docker build \
+            -t mostafaosmanfathi/${{ matrix.service }}:latest \
+            -t mostafaosmanfathi/${{ matrix.service }}:sha-${{ github.sha }} \
+            src/${{ matrix.service }}
+
+      # Scan the local image before pushing: a vulnerable image never reaches
+      # the registry. Trivy caches its vulnerability DB automatically.
+      - name: Scan with Trivy
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: mostafaosmanfathi/${{ matrix.service }}:latest
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+          ignore-unfixed: true
+          format: table
+          exit-code: '1'
+
+      - name: Push the image
+        if: github.event_name != 'pull_request'
+        run: |
+          docker push mostafaosmanfathi/${{ matrix.service }}:latest
+          docker push mostafaosmanfathi/${{ matrix.service }}:sha-${{ github.sha }}

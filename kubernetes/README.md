@@ -82,9 +82,9 @@ the `ivolve` namespace.
 | `ConfigMap/ivolve-config` | Image references, service URLs, ports, database name and user |
 | `Secret/ivolve-secret` | `MYSQL_ROOT_PASSWORD`, `MYSQL_PASSWORD` and `SESSION_SECRET` |
 
-The ConfigMap holds the image references as well, which is what the image CI
-reads when it updates the manifests. The actual `image:` field of a container
-can not be templated, so the pipeline uses `kubectl set image`.
+The ConfigMap holds image references as documentation of the images in use.
+The actual `image:` field of a container can not be templated, so pinning a
+Deployment to a specific build uses `kubectl set image` as shown in section 7.
 
 The Secret uses `stringData`, so the values are readable in the file. Replace
 them before a real deployment:
@@ -173,9 +173,11 @@ kubectl port-forward -n ivolve svc/frontend 3000:3000
 
 ## 7. Updating the image references
 
-The GitHub Actions image CI updates the manifests before it pushes them to the
-repository. `kubectl set image --local` rewrites the image of the container
-without needing a cluster:
+The image CI pushes `mostafaosmanfathi/<service>:latest` and a
+`:sha-<commit>` tag for every successful build. The Deployments use `latest`,
+so they pick up the newest image on restart. To pin a Deployment to a specific
+build, `kubectl set image --local` rewrites the image without needing a
+cluster:
 
 ```bash
 kubectl set image --local \

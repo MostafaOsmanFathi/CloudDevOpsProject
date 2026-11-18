@@ -129,16 +129,16 @@ Details are in [`kubernetes/README.md`](./kubernetes/README.md).
 
 ## Continuous integration (GitHub Actions)
 
-The [`.github/workflows`](./.github/workflows) directory holds the workflows
-that build, scan with Trivy and push the microservice images to Docker Hub
-under the `mostafaosmanfathi` namespace, plus a validation workflow that checks
-the Terraform, the Ansible, the manifests and the Docker Compose stack on every
-pull request.
+The [`.github/workflows`](./.github/workflows) directory holds one image
+workflow that builds the three services, scans them with Trivy and pushes them
+to Docker Hub under `mostafaosmanfathi/`, plus a validation workflow that
+checks the Terraform, the Ansible, the manifests and the Docker Compose stack
+on every pull request.
 
 ```bash
-# The reusable workflow is called by frontend.yml, auth-service.yml
-# and roadmap-service.yml. The two repository secrets are
-# DOCKERHUB_USERNAME and DOCKERHUB_TOKEN (a Docker Hub access token).
+# image-ci.yml uses two repository secrets: DOCKERHUB_USERNAME and
+# DOCKERHUB_TOKEN (a Docker Hub access token). Images are tagged latest
+# and sha-<commit>.
 ```
 
 Details, including how to add the secrets and create the Docker Hub
