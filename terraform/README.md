@@ -1,5 +1,8 @@
 # Terraform - AWS Infrastructure Provisioning
 
+> The same stack exists for Azure in [`azure/`](./azure), with the same module
+> layout, the same variables and the same two phase deployment.
+
 Terraform modules that provision the AWS infrastructure for the iVolve DevOps
 project: the network, the Jenkins server, the EKS cluster and the ECR
 registries. The state is stored remotely in an S3 bucket.

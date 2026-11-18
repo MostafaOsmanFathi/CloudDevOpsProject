@@ -1,0 +1,47 @@
+# Copy to terraform.tfvars and adjust. Never commit terraform.tfvars with
+# real credentials, it is ignored by git.
+
+subscription_id = ""   # "" to use the Azure CLI session
+tenant_id       = ""
+client_id       = ""
+# client_secret  = ""   # or use ARM_CLIENT_SECRET
+
+location            = "West Europe"
+project_name        = "ivolve"
+environment         = "dev"
+resource_group_name = ""
+
+# Lock this down to your own public IP.
+admin_cidr = "0.0.0.0/0"
+
+vnet_cidr            = "10.0.0.0/16"
+availability_zones   = ["1", "2"]
+public_subnet_cidrs  = ["10.0.0.0/24", "10.0.1.0/24"]
+private_subnet_cidrs = ["10.0.10.0/24", "10.0.11.0/24"]
+single_nat_gateway   = false
+
+# Jenkins server
+vm_size            = "Standard_B2s"
+vm_admin_username   = "azureuser"
+# Leave empty to generate a random password, otherwise paste a public key.
+vm_admin_ssh_public_key = ""
+vm_os_disk_size_gb  = 64
+
+# AKS
+aks_kubernetes_version = ""
+aks_node_vm_size        = "Standard_B2s"
+aks_node_count          = 1
+aks_node_max_pods       = 110
+aks_min_count           = 1
+aks_max_count           = 2
+aks_service_cidr        = "10.1.0.0/16"
+aks_dns_service_ip      = "10.1.0.10"
+
+# ACR
+acr_sku                = "Standard"
+acr_retention_days     = 7
+acr_max_manifests      = 10
+
+tags = {
+  Owner = "devops-team"
+}

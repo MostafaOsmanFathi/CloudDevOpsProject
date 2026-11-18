@@ -1,0 +1,12 @@
+# Backend configuration for the remote Azure Storage state.
+# Copy this file to backend.hcl and fill in the values printed by the bootstrap
+# module (terraform/azure/bootstrap -> terraform output backend_config).
+#
+#   cp backend.hcl.example backend.hcl
+#   terraform init -backend-config=backend.hcl
+#
+storage_account_name = "ivolvedevopsstatexxxxxx"
+container_name        = "tfstate"
+key                    = "terraform.tfstate"
+resource_group_name    = "ivolvedevops-state-rg"
+use_azuread_auth       = true

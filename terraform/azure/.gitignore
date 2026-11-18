@@ -1,0 +1,15 @@
+# Local state and provider cache
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+
+# Variable files that may hold real values
+*.tfvars
+!*.tfvars.example
+
+# Backend configuration is account specific
+backend.hcl
+
+# Plan files
+*.tfplan
