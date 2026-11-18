@@ -79,25 +79,25 @@ cp .env.example .env
 
 ## Infrastructure provisioning (Terraform)
 
-The [`terraform/`](./terraform) directory holds the AWS modules for the network
-(VPC, public and private subnets, IGW, NAT, Network ACLs), the Jenkins server
-(EC2 + security group), the EKS cluster with two worker nodes in different
-availability zones, and the ECR repositories. The state is kept in an S3 bucket
-created by the `terraform/bootstrap` module.
+The [`terraform/`](./terraform) directory holds the multi-cloud
+[Terraform project](./terraform) for the AWS infrastructure (VPC, public and
+private subnets, IGW, NAT, Network ACLs) and the Azure infrastructure, with the
+Jenkins server (EC2 or VM), the EKS/AKS cluster with two nodes in different
+availability zones and the ECR/ACR registries.
 
 ```bash
-# Phase 1 - remote state bucket and lock table
-terraform -chdir=terraform/bootstrap init && terraform -chdir=terraform/bootstrap apply
-
-# Phase 2 - infrastructure
-cd terraform
-cp backend.hcl.example backend.hcl    # paste the values from the bootstrap output
-terraform init -backend-config=backend.hcl
-terraform apply
+# AWS, the first time: create the remote state, then the infrastructure
+cd terraform/aws/bootstrap && terraform init && terraform apply
+cd .. && cp backend.hcl.example backend.hcl
+terraform init -backend-config=backend.hcl && terraform apply
 ```
 
 Where to put the AWS credentials is documented in
-[`terraform/README.md`](./terraform/README.md#2-aws-authentication).
+[`terraform/aws/README.md`](./terraform/aws/README.md#2-aws-authentication), and
+the same section of the Azure guide is at
+[`terraform/azure/README.md`](./terraform/azure/README.md#2-azure-authentication).
+
+The full module layout for both clouds is in [`terraform/README.md`](./terraform/README.md).
 
 ## Server configuration (Ansible)
 

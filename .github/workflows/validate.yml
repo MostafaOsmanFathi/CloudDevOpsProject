@@ -18,6 +18,12 @@ jobs:
   terraform:
     name: Terraform
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - provider: aws
+          - provider: azure
     steps:
       - uses: actions/checkout@v4
 
@@ -27,15 +33,15 @@ jobs:
 
       - name: Check the formatting
         run: terraform fmt -recursive -check -diff
-        working-directory: terraform
+        working-directory: terraform/${{ matrix.provider }}
 
       - name: Validate the configuration
         run: terraform init -backend=false -input=false && terraform validate
-        working-directory: terraform
+        working-directory: terraform/${{ matrix.provider }}
 
       - name: Run the plan test
         run: terraform test
-        working-directory: terraform
+        working-directory: terraform/${{ matrix.provider }}
 
   ansible:
     name: Ansible
