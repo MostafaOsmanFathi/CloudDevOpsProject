@@ -26,7 +26,8 @@ jobs:
     with:
       service: roadmap-service
       context: src/roadmap-service
-      image: ivolve-roadmap-service
+      image: roadmap-service
+      namespace: mostafaosmanfathi
       push: ${{ github.event_name != 'pull_request' }}
       update-manifests: ${{ github.event_name == 'push' }}
     secrets: inherit
