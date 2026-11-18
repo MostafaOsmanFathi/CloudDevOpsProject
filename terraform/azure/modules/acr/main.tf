@@ -15,7 +15,8 @@ resource "azurerm_container_registry" "this" {
   sku                 = var.sku
   admin_enabled       = false
 
-  retention_policy_in_days   = var.retention_policy_in_days
+  # The retention policy is only available on the Premium SKU.
+  retention_policy_in_days   = var.sku == "Premium" ? var.retention_policy_in_days : null
   quarantine_policy_enabled  = false
   data_endpoint_enabled      = false
   network_rule_bypass_option = "AzureServices"

@@ -42,6 +42,124 @@ azure/
 **The credentials never go into the Terraform files.** Pick one of the options
 below.
 
+### New to Azure? Step-by-step
+
+This section walks through everything from a fresh machine to a working
+`terraform apply`.
+
+**1. Install the Azure CLI** (if it is missing):
+
+```bash
+# Fedora, the same distribution this repository is built on
+sudo dnf install azure-cli
+# Debian / Ubuntu
+curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+```
+
+On this machine the CLI is already installed, at `~/.local/bin/az` (uv), with a
+session against the **Azure for Students** subscription.
+
+**2. Sign in.** A browser window opens for the Microsoft login:
+
+```bash
+az login
+```
+
+Non-interactive shells can sign in with a device code instead:
+
+```bash
+az login --use-device-code
+```
+
+**3. See which subscriptions you own and pick one:**
+
+```bash
+az account list -o table
+az account show -o table
+az account set --subscription "<SubscriptionId>"
+```
+
+To just see the values you need for the credentials file:
+
+```bash
+az account show --query id        -o tsv   # subscription id
+az account show --query tenantId  -o tsv   # tenant id
+```
+
+**4. Create the credentials file.** The repository ships a template:
+
+```bash
+cd terraform/azure
+cp azure-credentials.env.example azure-credentials.env
+```
+
+`azure-credentials.env.example` is the placeholder with every slot, and a copy
+of it, `azure-credentials.env`, is already in place with the subscription and
+tenant of this account filled in:
+
+```bash
+export ARM_SUBSCRIPTION_ID="a46049d1-9063-4919-a44a-c61c2c07cd42"
+export ARM_TENANT_ID="f2b34026-ae5e-4b9c-be0c-4c268dce6de9"
+```
+
+Source it before running Terraform:
+
+```bash
+source azure-credentials.env
+terraform plan
+```
+
+`azure-credentials.env` is ignored by git.
+
+**5. Use the Azure CLI session directly.** This is the simplest path and needs
+no service principal at all. The provider picks the current subscription and
+tenant up automatically. `subscription_id`, `tenant_id`, `client_id` and
+`client_secret` can stay empty in `terraform.tfvars`.
+
+```bash
+az login
+az account set --subscription "<SubscriptionId>"
+terraform apply
+```
+
+**6. Create a service principal** (only for CI/CD, e.g. GitHub Actions or the
+Jenkins pipeline):
+
+```bash
+az ad sp create-for-rbac --name ivolve-devops \
+  --role Contributor \
+  --scopes /subscriptions/<SubscriptionId>
+```
+
+To use the service principal instead of the CLI session, add the two commented
+ones to `azure-credentials.env`. The secret is printed only once, so copy it
+immediately:
+
+```bash
+# add or uncomment these in azure-credentials.env
+export ARM_CLIENT_ID="<appId>"
+export ARM_CLIENT_SECRET="<password>"
+```
+
+The same values can be set as the environment variables of the shell or of a
+CI/CD runner instead of being written to a file.
+
+`Contributor` is enough to build the infrastructure. It cannot grant roles, so
+the role assignments that Terraform creates (`AcrPull` in the AKS and VM
+modules, `Storage Blob Data Contributor` in the bootstrap module) fail with it.
+To grant the roles too, give the service principal the **`User Access
+Administrator`** role on the subscription, or grant the roles manually once:
+
+```bash
+SP_ID=$(az ad sp list --display-name ivolve-devops --query '[].id' -o tsv)
+az role assignment create --assignee "$SP_ID" --role "AcrPull" \
+  --scope /subscriptions/<SubscriptionId>/resourceGroups/ivolve-dev-rg
+```
+
+The AKS `ClusterAdmin` role is needed to run `kubectl` against the cluster.
+Use the Azure CLI session for that instead, or give the service principal the
+`Azure Kubernetes Service Cluster Admin Role`.
+
 ### Option A - Azure CLI session (recommended for a workstation)
 
 ```bash

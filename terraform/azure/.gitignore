@@ -8,6 +8,9 @@ crash.log
 *.tfvars
 !*.tfvars.example
 
+# Azure credentials from azure-credentials.env.example
+azure-credentials.env
+
 # Backend configuration is account specific
 backend.hcl
 
