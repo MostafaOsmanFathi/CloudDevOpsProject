@@ -212,7 +212,6 @@ resource "azurerm_public_ip" "nat" {
   allocation_method   = "Static"
   sku                 = "Standard"
   sku_tier            = "Regional"
-  zones               = [var.availability_zones[count.index]]
 
   tags = merge(var.tags, {
     Name = "${var.name_prefix}-nat-ip-${count.index + 1}"
@@ -226,7 +225,6 @@ resource "azurerm_nat_gateway" "this" {
   name                = "${var.name_prefix}-nat-${count.index + 1}"
   resource_group_name = var.resource_group_name
   sku_name            = "Standard"
-  zones               = [var.availability_zones[count.index]]
 
   tags = merge(var.tags, {
     Name = "${var.name_prefix}-nat-${count.index + 1}"

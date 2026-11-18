@@ -58,11 +58,6 @@ output "node_pool_subnet_ids" {
   value       = { for az, pool in azurerm_kubernetes_cluster_node_pool.workers : az => pool.vnet_subnet_id }
 }
 
-output "node_pool_zones" {
-  description = "Zone used by each node pool."
-  value       = { for az, pool in azurerm_kubernetes_cluster_node_pool.workers : az => pool.zones }
-}
-
 output "current_kubernetes_version" {
   description = "Kubernetes version the cluster runs."
   value       = azurerm_kubernetes_cluster.this.current_kubernetes_version

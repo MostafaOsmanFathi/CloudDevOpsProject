@@ -36,7 +36,6 @@ resource "azurerm_kubernetes_cluster" "this" {
     type                 = "VirtualMachineScaleSets"
 
     vnet_subnet_id = var.private_subnet_ids_by_az[local.azs[0]]
-    zones          = [local.azs[0]]
   }
 
   network_profile {
@@ -82,7 +81,6 @@ resource "azurerm_kubernetes_cluster_node_pool" "workers" {
   os_disk_type          = "Managed"
   os_sku                = "AzureLinux"
   vnet_subnet_id        = each.value
-  zones                 = [each.key]
 
   node_labels = {
     "node-role" = "worker"
