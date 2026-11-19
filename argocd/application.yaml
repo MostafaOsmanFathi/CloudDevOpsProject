@@ -27,6 +27,9 @@ spec:
     namespace: ivolve
   syncPolicy:
     automated:
+      # Without `enabled: true` Argo CD only reports OutOfSync and never rolls
+      # out a new Git revision - the CI tag update would be ignored.
+      enabled: true
       prune: true
       selfHeal: true
     syncOptions:
