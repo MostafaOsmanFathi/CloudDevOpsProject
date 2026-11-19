@@ -32,8 +32,8 @@ resources:
 # has pushed the images; Argo CD sees the new revision and rolls it out.
 images:
   - name: mostafaosmanfathi/frontend
-    newTag: sha-7daefab1ce9ad7a9d02e1f2a9b34eba645871a6f
+    newTag: sha-a673b8e8c18e82b5566590fe773141715ac10655
   - name: mostafaosmanfathi/auth-service
-    newTag: sha-7daefab1ce9ad7a9d02e1f2a9b34eba645871a6f
+    newTag: sha-a673b8e8c18e82b5566590fe773141715ac10655
   - name: mostafaosmanfathi/roadmap-service
-    newTag: sha-7daefab1ce9ad7a9d02e1f2a9b34eba645871a6f
+    newTag: sha-a673b8e8c18e82b5566590fe773141715ac10655
