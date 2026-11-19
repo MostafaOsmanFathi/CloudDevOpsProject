@@ -74,8 +74,8 @@ class Diagram:
         cid = self._id("g")
         style = (
             f"container=1;dropTarget=1;fillColor={fill};strokeColor={stroke};"
-            f"strokeWidth=2;fontStyle=1;fontSize=13;verticalAlign=top;align=left;"
-            f"spacingLeft=12;spacingTop=6;dashed=0;{extra}"
+            f"strokeWidth=2;fontStyle=1;fontSize=19;verticalAlign=top;align=left;"
+            f"spacingLeft=16;spacingTop=8;dashed=0;{extra}"
         )
         self.cells.append(
             f'        <mxCell id="{cid}" value="{esc(label)}" style="{style}" vertex="1" parent="{parent}">\n'
@@ -87,7 +87,7 @@ class Diagram:
         self.offsets[cid] = (ax, ay)
         return cid
 
-    def icon(self, x, y, label, res_icon, fill, parent="1", size=78, stroke="#ffffff"):
+    def icon(self, x, y, label, res_icon, fill, parent="1", size=92, stroke="#ffffff"):
         cid = self._id("i")
         style = (
             "sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],"
@@ -95,7 +95,7 @@ class Diagram:
             "[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;"
             f"fontColor=#232F3E;fillColor={fill};strokeColor={stroke};dashed=0;"
             "verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;"
-            f"fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;"
+            f"fontSize=18;fontStyle=1;aspect=fixed;shape=mxgraph.aws4.resourceIcon;"
             f"resIcon=mxgraph.aws4.{res_icon}"
         )
         self.cells.append(
@@ -107,12 +107,12 @@ class Diagram:
         self.labels[cid] = label
         return cid
 
-    def shape(self, x, y, label, shape, fill, parent="1", size=65, stroke="none", font="#232F3E"):
+    def shape(self, x, y, label, shape, fill, parent="1", size=78, stroke="none", font="#232F3E"):
         cid = self._id("s")
         style = (
             f"sketch=0;outlineConnect=0;fontColor={font};fillColor={fill};"
             f"strokeColor={stroke};dashed=0;verticalLabelPosition=bottom;"
-            f"verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;"
+            f"verticalAlign=top;align=center;html=1;fontSize=18;fontStyle=1;"
             f"aspect=fixed;shape=mxgraph.aws4.{shape}"
         )
         self.cells.append(
@@ -125,7 +125,7 @@ class Diagram:
         return cid
 
     def box(self, x, y, w, h, label, parent="1", fill="#ffffff", stroke="#5A6C86",
-            font="#232F3E", size=12, bold=False, dashed=0):
+            font="#232F3E", size=17, bold=True, dashed=0):
         cid = self._id("b")
         weight = 1 if bold else 0
         style = (
@@ -142,7 +142,7 @@ class Diagram:
         self.labels[cid] = label
         return cid
 
-    def text(self, x, y, w, h, label, parent="1", size=14, bold=True, align="left"):
+    def text(self, x, y, w, h, label, parent="1", size=18, bold=True, align="left"):
         cid = self._id("t")
         weight = 1 if bold else 0
         style = (
@@ -170,7 +170,7 @@ class Diagram:
         if arrow:
             style += "endArrow=block;endFill=1;endSize=7;"
         if label:
-            style += "labelBackgroundColor=#F5F5F5;fontSize=11;"
+            style += "labelBackgroundColor=#F5F5F5;fontSize=15;fontStyle=1;"
         self.cells.append(
             f'        <mxCell id="{cid}" value="{esc(label)}" style="{style}" edge="1" '
             f'parent="{parent}" source="{src}" target="{dst}">\n'
@@ -287,7 +287,10 @@ class Diagram:
             if parent in self.shapes and self.shapes[parent][5]:
                 gx, gy, gw, gh, _, _ = self.shapes[parent]
                 if x < 0 or y < 0 or x + w > gw or y + h > gh:
-                    problems.append(f"{cid} escapes group {parent}")
+                    problems.append(
+                        f"{self.labels.get(cid, cid)} escapes {self.labels.get(parent, parent)} "
+                        f"({x},{y},{w},{h}) in ({gw},{gh})"
+                    )
 
         if problems:
             print(f"[check] {name}: {len(problems)} issue(s)")
@@ -336,9 +339,9 @@ class Diagram:
 
 
 def title(d, text, sub=None):
-    d.text(40, 20, 900, 40, text, size=18)
+    d.text(40, 20, 1100, 50, text, size=26)
     if sub:
-        d.text(40, 58, 1500, 30, sub, size=12, bold=False)
+        d.text(40, 68, 1900, 34, sub, size=15, bold=False)
 
 
 # ---------------------------------------------------------------- 01 overview
@@ -352,7 +355,7 @@ def overview():
     )
 
     # ---- actors, left
-    users = d.shape(100, 260, "Users", "client", "#232F3D", size=65)
+    users = d.shape(100, 260, "Users", "client", "#232F3D", size=78)
     r53 = d.icon(330, 255, "Route 53<br/>(DNS)", "route_53", "#8C4FFF")
     d.edge(users, r53, "HTTPS")
 
@@ -365,8 +368,8 @@ def overview():
     # public subnet: the bastion host
     pub = d.group(40, 60, 560, 900, "Public subnet &mdash; AZ 1 (Azure public-subnet-1)", "#7AA116", parent=vpc)
     ec2 = d.icon(150, 80, "EC2 (Azure VM)<br/>nginx &middot; Jenkins &middot; Docker &middot; Trivy", "ec2", "#ED7100", parent=pub)
-    eip1 = d.icon(150, 240, "Elastic IP<br/>ivolve.&lt;region&gt;.cloudapp&shy;.azure.com", "elastic_ip_address", "#ED7100", parent=pub, size=65, stroke="none")
-    eip2 = d.icon(150, 390, "Elastic IP<br/>ivolve-argocd.&lt;region&gt;.cloudapp&shy;.azure.com", "elastic_ip_address", "#ED7100", parent=pub, size=65, stroke="none")
+    eip1 = d.icon(150, 240, "Elastic IP<br/>ivolve.denmarkeast.cloudapp.azure.com", "elastic_ip_address", "#ED7100", parent=pub, size=78, stroke="none")
+    eip2 = d.icon(150, 390, "Elastic IP<br/>ivolve-argocd.denmarkeast.cloudapp.azure.com", "elastic_ip_address", "#ED7100", parent=pub, size=78, stroke="none")
     sg = d.box(20, 540, 220, 100, "Security Group<br/>(Azure NSG)<br/>22 &middot; 80", parent=pub, fill="#ffffff", stroke="#DD344C")
     nat = d.icon(150, 690, "NAT Gateway<br/>egress only", "nat_gateway", "#8C4FFF", parent=pub, stroke="none")
 
@@ -381,13 +384,13 @@ def overview():
     node2 = d.icon(30, 60, "worker node", "instance2", "#ED7100", parent=priv2, stroke="none")
     wl2 = d.box(160, 50, 370, 200, "MySQL StatefulSet<br/>+ headless Service<br/><br/>"
                                 "StorageClass &rarr; EBS", parent=priv2, fill="#F0F7FF", stroke="#147EBA")
-    ebs = d.icon(30, 230, "EBS", "elastic_block_store", "#C925D1", parent=priv2, stroke="none", size=65)
+    ebs = d.icon(30, 230, "EBS", "elastic_block_store", "#C925D1", parent=priv2, stroke="none", size=78)
 
     # ---- right column of the cloud
     s3 = d.icon(1330, 110, "S3<br/>Terraform state", "s3", "#7AA116", parent=cloud)
     ddb = d.icon(1330, 290, "DynamoDB<br/>state lock", "dynamodb", "#C925D1", parent=cloud)
     ecr = d.icon(1560, 560, "ECR<br/>(Azure ACR)", "ecr", "#ED7100", parent=cloud)
-    argo = d.icon(1700, 730, "Argo CD<br/>Application", "codepipeline", "#E7157B", parent=cloud)
+    argo = d.icon(1660, 730, "Argo CD<br/>Application", "codepipeline", "#E7157B", parent=cloud)
 
     # ---- CI lane under the cloud, right-aligned below ECR / Argo CD
     ci = d.group(1100, 1300, 1240, 340, "Continuous Integration &amp; Delivery &mdash; CodeBuild / CodePipeline "
@@ -432,8 +435,8 @@ def network():
     # public AZ1
     pub1 = d.group(40, 60, 1000, 380, "Public subnet &mdash; AZ 1 (10.0.0.0/24)", "#7AA116", parent=vpc)
     ec2 = d.icon(270, 80, "EC2 (Azure VM)<br/>Jenkins &middot; nginx", "ec2", "#ED7100", parent=pub1)
-    d.icon(560, 40, "Elastic IP<br/>ivolve.&lt;region&gt;.cloudapp&shy;.azure.com", "elastic_ip_address", "#ED7100", parent=pub1, size=65, stroke="none")
-    d.icon(560, 180, "Elastic IP<br/>ivolve-argocd.&lt;region&gt;.cloudapp&shy;.azure.com", "elastic_ip_address", "#ED7100", parent=pub1, size=65, stroke="none")
+    d.icon(560, 40, "Elastic IP<br/>ivolve.denmarkeast.cloudapp.azure.com", "elastic_ip_address", "#ED7100", parent=pub1, size=78, stroke="none")
+    d.icon(560, 180, "Elastic IP<br/>ivolve-argocd.denmarkeast.cloudapp.azure.com", "elastic_ip_address", "#ED7100", parent=pub1, size=78, stroke="none")
     nat = d.icon(820, 250, "NAT Gateway<br/>egress only", "nat_gateway", "#8C4FFF", parent=pub1, stroke="none")
     d.box(60, 250, 260, 100, "Security Group (Azure NSG)<br/>in: 22 &middot; 80<br/>out: all", parent=pub1,
           fill="#ffffff", stroke="#DD344C")
@@ -455,7 +458,7 @@ def network():
     d.icon(160, 80, "EKS worker node", "instance2", "#ED7100", parent=priv2, stroke="none")
     d.box(60, 230, 380, 120, "MySQL StatefulSet<br/>+ headless Service<br/><br/>StorageClass &rarr; EBS",
           parent=priv2, fill="#F0F7FF", stroke="#147EBA")
-    d.icon(600, 240, "EBS", "elastic_block_store", "#C925D1", parent=priv2, stroke="none", size=65)
+    d.icon(600, 240, "EBS", "elastic_block_store", "#C925D1", parent=priv2, stroke="none", size=78)
 
     d.box(1080, 880, 900, 90, "Network ACL (Azure NSG) &mdash; public: 22 from the admin CIDR, 80/443 from "
                              "anywhere; private: VNet only", parent=vpc, fill="#FBFBFB", stroke="#5A6C86", dashed=1)
@@ -497,7 +500,7 @@ def cicd():
     app = d.icon(1240, 110, "Argo CD Application<br/>repo &middot; path kubernetes/", "codepipeline", "#E7157B", parent=cd)
     eks = d.icon(1560, 100, "EKS control plane<br/>(Azure AKS)", "eks", "#ED7100", parent=cd)
     roll = d.icon(1840, 100, "rolling update<br/>Deployments", "ecs", "#ED7100", parent=cd)
-    svc = d.shape(2100, 100, "Services<br/>ClusterIP + NodePort", "application_load_balancer", "#8C4FFF", parent=cd, size=65)
+    svc = d.shape(2100, 100, "Services<br/>ClusterIP + NodePort", "application_load_balancer", "#8C4FFF", parent=cd, size=78)
     d.edge(app, eks, "sync", parent=cd)
     d.edge(eks, roll, "", parent=cd)
     d.edge(roll, svc, "", parent=cd)
@@ -527,15 +530,15 @@ def request_flow():
         "AKS NodePort 30300, ClusterIP Services, StatefulSet on Azure Disk (EBS).",
     )
 
-    client = d.shape(80, 560, "Client<br/>browser", "client", "#232F3D", size=65)
+    client = d.shape(80, 560, "Client<br/>browser", "client", "#232F3D", size=78)
     r53 = d.icon(300, 555, "Route 53<br/>DNS", "route_53", "#8C4FFF")
-    eip = d.icon(540, 555, "Elastic IP<br/>ivolve.&lt;region&gt;.cloudapp&shy;.azure.com", "elastic_ip_address", "#ED7100", size=65, stroke="none")
+    eip = d.icon(540, 555, "Elastic IP<br/>ivolve.denmarkeast.cloudapp.azure.com", "elastic_ip_address", "#ED7100", size=78, stroke="none")
     nginx = d.box(780, 540, 260, 110, "EC2 &mdash; nginx reverse proxy<br/>port 80 &rarr; NodePort 30300", fill="#FFF7EC", stroke="#ED7100")
     fe = d.icon(1180, 555, "frontend Deployment<br/>Node.js / Express", "ec2", "#ED7100")
     auth = d.icon(1480, 430, "auth-service<br/>Python / Flask", "ecs", "#ED7100")
     road = d.icon(1480, 680, "roadmap-service<br/>Java / Spring Boot", "ecs", "#ED7100")
     db = d.icon(1880, 555, "MySQL StatefulSet<br/>headless Service", "rds_mysql_instance", "#C925D1")
-    ebs = d.icon(2140, 555, "EBS<br/>StorageClass gp3", "elastic_block_store", "#C925D1", size=65, stroke="none")
+    ebs = d.icon(2140, 555, "EBS<br/>StorageClass gp3", "elastic_block_store", "#C925D1", size=78, stroke="none")
 
     d.edge(client, r53, "①", exit=(1, 0.5), entry=(0, 0.5))
     d.edge(r53, eip, "②", exit=(1, 0.5), entry=(0, 0.5))
@@ -548,7 +551,7 @@ def request_flow():
     d.edge(db, ebs, "⑦", exit=(1, 0.5), entry=(0, 0.5))
 
     d.box(80, 900, 2240, 130, "The frontend calls auth and roadmap server-side, so the browser only ever talks to port 80. "
-                              "The same EC2 also serves the Argo CD UI (ivolve-argocd.&lt;region&gt;.cloudapp&shy;.azure.com) "
+                              "The same EC2 also serves the Argo CD UI (ivolve-argocd.denmarkeast.cloudapp.azure.com) "
                               "and runs cloudflared for the https tunnel.", fill="#FBFBFB", stroke="#5A6C86", dashed=1)
 
     d.render("04-request-path")
