@@ -157,7 +157,7 @@ class Diagram:
         return cid
 
     def edge(self, src, dst, label="", parent="1", dashed=0, color="#232F3E",
-             exit=(1, 0.5), entry=(0, 0.5), width=2):
+             exit=(1, 0.5), entry=(0, 0.5), width=3.5, arrow=True):
         cid = self._id("e")
         ex, ey = exit
         nx, ny = entry
@@ -167,6 +167,8 @@ class Diagram:
             f"exitX={ex};exitY={ey};exitDx=0;exitDy=0;entryX={nx};entryY={ny};"
             "entryDx=0;entryDy=0;"
         )
+        if arrow:
+            style += "endArrow=block;endFill=1;endSize=7;"
         if label:
             style += "labelBackgroundColor=#F5F5F5;fontSize=11;"
         self.cells.append(
@@ -176,6 +178,33 @@ class Diagram:
             f"        </mxCell>"
         )
         self.edges.append((src, dst, exit, entry, label))
+        return cid
+
+    def route(self, src, dst, exit=(1, 0.5), entry=(0, 0.5)):
+        """The polyline draw.io will most likely draw, used to animate traffic
+        along the visible line. Picks the first variant that avoids other icons."""
+        p1 = self._anchor(src, exit)
+        p2 = self._anchor(dst, entry)
+        mx = (p1[0] + p2[0]) / 2
+        my = (p1[1] + p2[1]) / 2
+        variants = [
+            [p1, (mx, p1[1]), (mx, p2[1]), p2],
+            [p1, (p1[0], my), (p2[0], my), p2],
+            [p1, p2],
+        ]
+        for poly in variants:
+            pts = self._sample(poly)
+            if not any(
+                self._hits(r, pts)
+                for k, r in self._rects_all().items()
+                if k not in (src, dst)
+            ):
+                return poly
+        return variants[0]
+
+    def _rects_all(self):
+        return {k: self._rect(k) for k, v in self.shapes.items() if not v[5]}
+
 
     # ------------------------------------------------------------ self-check
     def _rect(self, cid):
@@ -379,6 +408,11 @@ def overview():
     d.edge(nat, priv2, "egress", parent="1")
 
     d.render("01-system-overview")
+    return d, {
+        "users": users, "r53": r53, "ec2": ec2, "eks": eks, "nat": nat,
+        "wl1": wl1, "priv1": priv1, "priv2": priv2, "ecr": ecr, "argo": argo,
+        "repo": repo, "build": build, "pipe": pipe, "vpc": vpc,
+    }
 
 
 # ---------------------------------------------------------------- 02 network

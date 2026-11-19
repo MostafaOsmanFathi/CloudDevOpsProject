@@ -14,6 +14,13 @@ committed next to its `.png`, so the images can be regenerated or edited.
 | [`02-network-topology`](02-network-topology.png) | VPC, two AZs, public/private subnets, IGW, NAT, security groups |
 | [`03-cicd-pipeline`](03-cicd-pipeline.png) | build → scan → push → update manifests → Argo CD rollout, plus the Jenkins path |
 | [`04-request-path`](04-request-path.png) | one numbered request from the browser to the database |
+| [**animated overview (GIF)**](01-system-overview-animated.gif) | 8 s loop, 25 fps — coloured packets travel the real connector paths |
+| [animated overview (MP4)](01-system-overview-animated.mp4) | same animation, smaller and presentation-friendly |
+
+The connector lines are 3.5 px with filled arrowheads. The animation overlays four
+colour-coded flows on the static render: blue = user request, magenta = CI build
+and push, violet = Argo CD sync, purple = ECR image pull. Packets follow the
+exact orthogonal paths of the drawn edges.
 
 ## AWS name → what actually runs
 
@@ -49,4 +56,5 @@ push to main
 
 ```bash
 python3 src/make_diagrams.py     # needs the drawio CLI and a Wayland/X display
+python3 src/make_animation.py    # GIF + MP4 from the rendered overview
 ```
