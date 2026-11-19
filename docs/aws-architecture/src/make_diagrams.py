@@ -24,7 +24,25 @@ AWS_ICONS = "/usr/sbin/drawio"
 # ---------------------------------------------------------------- helpers
 
 
+ENTITIES = {
+    "&mdash;": "\u2014",
+    "&ndash;": "\u2013",
+    "&middot;": "\u00b7",
+    "&rarr;": "\u2192",
+    "&rArr;": "\u21d2",
+    "&amp;": "&",
+    "&lt;": "<",
+    "&gt;": ">",
+    "&shy;": "",
+    "&nbsp;": " ",
+}
+
+
 def esc(text: str) -> str:
+    """Labels are authored with entities; turn them into real characters first,
+    otherwise the escaping below renders them literally."""
+    for ent, char in ENTITIES.items():
+        text = text.replace(ent, char)
     return html.escape(text, quote=False)
 
 
@@ -313,7 +331,7 @@ def overview():
     cloud = d.group(560, 140, 1780, 1100, "AWS Cloud &mdash; region (Azure: denmarkeast)", "#232F3E")
     vpc = d.group(40, 60, 1230, 980, "VPC &mdash; 10.0.0.0/16 (Azure VNet ivolve-vnet)", "#8C4FFF", parent=cloud)
 
-    d.icon(20, 10, "Internet Gateway", "internet_gateway", "#8C4FFF", parent=vpc, stroke="none")
+    d.icon(500, 12, "Internet Gateway", "internet_gateway", "#8C4FFF", parent=vpc, stroke="none")
 
     # public subnet: the bastion host
     pub = d.group(40, 60, 560, 900, "Public subnet &mdash; AZ 1 (Azure public-subnet-1)", "#7AA116", parent=vpc)
@@ -375,7 +393,7 @@ def network():
 
     cloud = d.group(60, 130, 2280, 1160, "AWS Cloud &mdash; region (Azure: denmarkeast)", "#232F3E")
     vpc = d.group(40, 60, 2180, 1000, "VPC &mdash; 10.0.0.0/16 (Azure VNet ivolve-vnet)", "#8C4FFF", parent=cloud)
-    d.icon(20, 10, "Internet Gateway", "internet_gateway", "#8C4FFF", parent=vpc, stroke="none")
+    d.icon(500, 12, "Internet Gateway", "internet_gateway", "#8C4FFF", parent=vpc, stroke="none")
 
     # public AZ1
     pub1 = d.group(40, 60, 1000, 380, "Public subnet &mdash; AZ 1 (10.0.0.0/24)", "#7AA116", parent=vpc)
