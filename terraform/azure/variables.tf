@@ -89,6 +89,12 @@ variable "vm_size" {
   default     = "Standard_B2s"
 }
 
+variable "jenkins_dns_label" {
+  description = "DNS name label of the Jenkins public IP. The application is reached at <label>.<location>.cloudapp.azure.com. Must be globally unique."
+  type        = string
+  default     = "ivolve"
+}
+
 variable "vm_admin_username" {
   description = "Admin user of the Jenkins VM."
   type        = string

@@ -30,6 +30,11 @@ resource "azurerm_public_ip" "jenkins" {
   sku                 = "Standard"
   sku_tier            = "Regional"
 
+  # Free Microsoft domain: ivolve.denmarkeast.cloudapp.azure.com. Azure DNS is
+  # the Route 53 equivalent, but it only hosts zones for a domain you own, so
+  # this label is the no-cost way to get a name for the application.
+  domain_name_label = var.jenkins_dns_label
+
   tags = merge(var.tags, {
     Name = "${var.name_prefix}-jenkins-ip"
   })

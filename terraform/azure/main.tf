@@ -40,6 +40,7 @@ module "server" {
   public_subnet_ids       = module.network.public_subnet_ids
   public_subnet_ids_by_az = module.network.public_subnet_ids_by_az
   vm_size                 = var.vm_size
+  jenkins_dns_label       = var.jenkins_dns_label
   admin_username          = var.vm_admin_username
   admin_ssh_public_key    = var.vm_admin_ssh_public_key
   os_disk_size_gb         = var.vm_os_disk_size_gb

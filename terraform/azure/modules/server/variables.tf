@@ -29,6 +29,12 @@ variable "vm_size" {
   default     = "Standard_B2s"
 }
 
+variable "jenkins_dns_label" {
+  description = "DNS name label of the public IP. The FQDN becomes <label>.<location>.cloudapp.azure.com, which is how the application is reached. Must be globally unique."
+  type        = string
+  default     = "ivolve"
+}
+
 variable "admin_username" {
   description = "Admin user of the VM."
   type        = string

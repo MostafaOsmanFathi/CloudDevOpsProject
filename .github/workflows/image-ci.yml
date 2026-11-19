@@ -3,6 +3,13 @@ name: Build, scan and push images
 on:
   push:
     branches: [main]
+    # Only a change that can alter an image or a deployed manifest needs a
+    # build; docs and terraform commits should not rebuild three images.
+    paths:
+      - "src/**"
+      - "kubernetes/**"
+      - "docker-compose.yml"
+      - ".github/workflows/image-ci.yml"
   pull_request:
   workflow_dispatch:
 
