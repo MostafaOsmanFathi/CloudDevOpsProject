@@ -53,3 +53,37 @@ jobs:
         run: |
           docker push mostafaosmanfathi/${{ matrix.service }}:latest
           docker push mostafaosmanfathi/${{ matrix.service }}:sha-${{ github.sha }}
+
+  # Argo CD syncs what is in Git, so the image tag has to be written back to the
+  # repository: that commit is what Argo CD detects and rolls out. Without this
+  # job the Deployments would stay on `latest` forever and nothing would deploy.
+  gitops:
+    name: Pin the deployed image tags
+    needs: image
+    # Only for a push to main. A pull request must not change the deploy files,
+    # and the commit below carries [skip ci], so the loop stops after one run.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Pin the tags to this commit
+        run: |
+          sed -i "s|^\( *newTag: \)sha-.*|\1sha-${GITHUB_SHA}|" kubernetes/kustomization.yaml
+          git --no-pager diff -- kubernetes/kustomization.yaml
+
+      - name: Commit and push
+        run: |
+          if git diff --quiet -- kubernetes/kustomization.yaml; then
+            echo "image tags already point at ${GITHUB_SHA}"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add kubernetes/kustomization.yaml
+          git commit -m "chore(gitops): pin images to sha-${GITHUB_SHA} [skip ci]"
+          git push origin main

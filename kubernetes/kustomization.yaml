@@ -25,3 +25,15 @@ resources:
   - frontend/service.yaml
   - frontend/nodeport.yaml
   - frontend/ingress.yaml
+
+# GitOps pinning. The Deployments keep `:latest`, and the image tag is set
+# here, so a single file is the source of truth for what is deployed.
+# .github/workflows/image-ci.yml rewrites these tags to `sha-<commit>` after it
+# has pushed the images; Argo CD sees the new revision and rolls it out.
+images:
+  - name: mostafaosmanfathi/frontend
+    newTag: sha-12d17c6e95eaaaf2cafa6dd5dc52639be2f3e8b1
+  - name: mostafaosmanfathi/auth-service
+    newTag: sha-12d17c6e95eaaaf2cafa6dd5dc52639be2f3e8b1
+  - name: mostafaosmanfathi/roadmap-service
+    newTag: sha-12d17c6e95eaaaf2cafa6dd5dc52639be2f3e8b1
