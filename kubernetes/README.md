@@ -99,8 +99,8 @@ the `ivolve` namespace.
 | `Secret/ivolve-secret` | `MYSQL_ROOT_PASSWORD`, `MYSQL_PASSWORD` and `SESSION_SECRET` |
 
 The ConfigMap holds image references as documentation of the images in use.
-The actual `image:` field of a container can not be templated, so pinning a
-Deployment to a specific build uses `kubectl set image` as shown in section 7.
+The deployed tag is set in `kustomization.yaml` (`images[].newTag`) and is
+rewritten by the image CI, so it can not be templated from here - see section 7.
 
 The Secret uses `stringData`, so the values are readable in the file. Replace
 them before a real deployment:
@@ -193,25 +193,27 @@ kubectl port-forward -n ivolve svc/frontend 3000:3000
 
 ## 7. Updating the image references
 
-The image CI pushes `mostafaosmanfathi/<service>:latest` and a
-`:sha-<commit>` tag for every successful build. The Deployments use `latest`,
-so they pick up the newest image on restart. To pin a Deployment to a specific
-build, `kubectl set image --local` rewrites the image without needing a
-cluster:
+The image CI (`.github/workflows/image-ci.yml`) builds, scans and pushes
+`mostafaosmanfathi/<service>:latest` and `:sha-<full commit>` on every push to
+`main`. Once the images are pushed, it rewrites the `newTag` entries in
+`kustomization.yaml` to `sha-<full commit>` and commits them back - and that
+commit is what Argo CD detects:
 
-```bash
-kubectl set image --local \
-  -f frontend/deployment.yaml \
-  "frontend=mostafaosmanfathi/frontend:<tag>" \
-  -o yaml > frontend/deployment.yaml.tmp
-mv frontend/deployment.yaml.tmp frontend/deployment.yaml
+```
+push to main
+  → CI builds + pushes mostafaosmanfathi/<service>:sha-<commit>
+  → CI rewrites kubernetes/kustomization.yaml (images.newTag) and pushes [skip ci]
+  → Argo CD sees the new revision, syncs and rolls the Deployments
 ```
 
-Against a live cluster the same command works without `--local`:
+The Deployments keep `latest` in their own files; the deployed tag lives in
+`kustomization.yaml` only. Do not edit it by hand - self-heal reverts drift and
+the next CI run overwrites it.
+
+To see what would be deployed, render the kustomization:
 
 ```bash
-kubectl -n ivolve set image deployment/frontend \
-  frontend=mostafaosmanfathi/frontend:<tag>
+kubectl kustomize kubernetes/ | grep -E "image:|name: ivolve"
 ```
 
 > `kustomize edit set image` does **not** work here. The transformer matches
