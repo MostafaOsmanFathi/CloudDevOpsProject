@@ -95,6 +95,12 @@ variable "jenkins_dns_label" {
   default     = "ivolve"
 }
 
+variable "argocd_dns_label" {
+  description = "DNS name label of the second public IP on the same NIC, used for the Argo CD UI: <label>.<location>.cloudapp.azure.com. Must be globally unique."
+  type        = string
+  default     = "ivolve-argocd"
+}
+
 variable "vm_admin_username" {
   description = "Admin user of the Jenkins VM."
   type        = string

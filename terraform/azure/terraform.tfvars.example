@@ -22,7 +22,8 @@ single_nat_gateway   = false
 
 # Jenkins server
 vm_size            = "Standard_B2s"
-jenkins_dns_label  = "ivolve" # app URL: ivolve.<location>.cloudapp.azure.com
+jenkins_dns_label  = "ivolve"      # app URL: ivolve.<location>.cloudapp.azure.com
+argocd_dns_label   = "ivolve-argocd" # Argo CD URL: ivolve-argocd.<location>.cloudapp.azure.com
 vm_admin_username   = "azureuser"
 # Leave empty to generate a random password, otherwise paste a public key.
 vm_admin_ssh_public_key = ""

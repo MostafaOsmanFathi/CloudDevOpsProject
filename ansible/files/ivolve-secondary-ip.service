@@ -1,0 +1,16 @@
+[Unit]
+Description=Add the secondary IP behind the Argo CD public address (ivolve-argocd.denmarkeast.cloudapp.azure.com)
+Documentation=https://learn.microsoft.com/azure/virtual-network/virtual-network-network-interface-addresses
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+# Azure maps the public IP of the second ip_configuration to this private
+# address. The fabric delivers the packet to 10.0.0.5, so the guest has to own
+# it or the inbound connection is dropped. Idempotent: safe to run repeatedly.
+ExecStart=/bin/sh -c "ip addr show dev eth0 | grep -q '10.0.0.5/24' || ip addr add 10.0.0.5/24 dev eth0"
+
+[Install]
+WantedBy=multi-user.target

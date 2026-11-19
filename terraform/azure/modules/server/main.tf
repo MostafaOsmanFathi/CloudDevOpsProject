@@ -40,6 +40,25 @@ resource "azurerm_public_ip" "jenkins" {
   })
 }
 
+# Second public IP, only to carry the free Microsoft name for Argo CD:
+# ivolve-argocd.<location>.cloudapp.azure.com. It is attached to the same NIC as
+# a secondary IP configuration, so nginx answers for it like it does for the
+# application address. The region allows 3 public IPs and 2 were in use.
+resource "azurerm_public_ip" "argocd" {
+  location            = var.location
+  name                = "${var.name_prefix}-argocd-ip"
+  resource_group_name = var.resource_group_name
+  allocation_method   = "Static"
+  sku                 = "Standard"
+  sku_tier            = "Regional"
+
+  domain_name_label = var.argocd_dns_label
+
+  tags = merge(var.tags, {
+    Name = "${var.name_prefix}-argocd-ip"
+  })
+}
+
 resource "azurerm_network_interface" "jenkins" {
   location            = var.location
   name                = "${var.name_prefix}-jenkins-nic"
@@ -50,6 +69,18 @@ resource "azurerm_network_interface" "jenkins" {
     subnet_id                     = var.public_subnet_ids[0]
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = azurerm_public_ip.jenkins.id
+  }
+
+  # Secondary address of the same NIC: the Argo CD name. Azure maps the public
+  # IP to this private address, and the guest has to own the address for the
+  # mapping to work (see the ivolve-secondary-ip unit installed on the VM).
+  # Static so the address survives a redeploy and the unit keeps matching.
+  ip_configuration {
+    name                          = "${var.name_prefix}-argocd-ipconfig"
+    subnet_id                     = var.public_subnet_ids[0]
+    private_ip_address            = "10.0.0.5"
+    private_ip_address_allocation = "Static"
+    public_ip_address_id          = azurerm_public_ip.argocd.id
   }
 
   tags = merge(var.tags, {

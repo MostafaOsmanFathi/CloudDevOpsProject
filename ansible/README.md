@@ -154,15 +154,24 @@ repository is public, so no repository credentials are required.
 
 ### Reaching the UI
 
-Argo CD is published through a **Cloudflare Tunnel** running on the Jenkins VM,
-so it has a normal `https://` URL that works on any device - no certificate, no
-`hosts` entry, and no extra public IP:
+Argo CD has a Microsoft-owned name, so no `hosts` entry and no tunnel are
+needed:
+
+```
+http://ivolve-argocd.denmarkeast.cloudapp.azure.com/   -> admin / password printed by the playbook
+```
+
+It is served by nginx on the Jenkins VM from the second public IP of that NIC
+(`argocd_dns_label` in terraform/azure). The name only resolves over plain HTTP.
+
+A **Cloudflare Tunnel** is also installed on the VM, which gives an `https://`
+URL that works on any device:
 
 ```
 https://<name>.trycloudflare.com/     -> admin / password printed by the playbook
 ```
 
-Read the current URL after (re)starting the service:
+Read the current tunnel URL after (re)starting the service:
 
 ```bash
 journalctl -u cloudflared --no-pager -o cat | grep -o 'https://[a-z0-9-]*\.trycloudflare\.com' | tail -1
@@ -173,7 +182,7 @@ TLS is terminated by Cloudflare rather than by Argo CD itself). To make it
 permanent, create a **named tunnel** in the Cloudflare dashboard, put its token
 in the unit file and restart - the URL then stops changing on reboot.
 
-A plain-HTTP fallback also exists on the VM's public IP, by name:
+A plain-HTTP fallback on the first public IP, by name:
 
 ```
 http://argocd.ivolve.local/    (add: 9.205.91.181  argocd.ivolve.local)

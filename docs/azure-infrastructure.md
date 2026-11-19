@@ -249,27 +249,29 @@ cleaner design is a public LoadBalancer (or a public ingress) and nginx is dropp
 
 Argo CD runs in the `argocd` namespace, installed with the official Helm chart
 (`argo/argo-cd` 10.18.1, Argo CD v3.6.1) by `ansible/playbooks/argocd.yml`. The
-same public-IP limit applies, so the UI is published through a **Cloudflare
-Tunnel** on the Jenkins VM:
+same public-IP limit applies, so the UI is published from the Jenkins VM under a
+free Microsoft name:
 
 ```
-browser ─▶ https://<name>.trycloudflare.com ─▶ cloudflared (systemd unit, Jenkins VM)
-          ─▶ 10.0.10.4:30080 (NodePort argocd-server, plain HTTP)
-          ─▶ argocd-server pod
+browser ─▶ http://ivolve-argocd.denmarkeast.cloudapp.azure.com
+          ─▶ 9.205.89.178 (second public IP of the Jenkins NIC)
+          ─▶ nginx vhost argocd ─▶ 10.0.10.4:30080 (NodePort argocd-server)
 ```
 
 | Piece | Why |
 | --- | --- |
+| `argocd_dns_label = "ivolve-argocd"` | free Microsoft name; the application uses `ivolve` on the first public IP |
+| second `ip_configuration` on the NIC, `10.0.0.5` static | Azure maps the public IP to a private address the guest must own |
+| `ivolve-secondary-ip.service` on the VM | re-adds `10.0.0.5` at boot, because Azure does not configure secondary IPs inside the guest |
 | `server.service.type: NodePort` (HTTP 30080) | no public IP is left for a LoadBalancer |
-| `configs.params."server.insecure": "true"` | TLS is terminated by Cloudflare; Argo CD serves plain HTTP inside the VNet |
-| `cloudflared.service` (`ansible/files/setup-cloudflared.sh`) | a quick tunnel gives a real `https://` URL with no certificate, no DNS and no `hosts` entry |
-| nginx vhost `argocd.ivolve.local` (`ansible/files/ivolve-proxy.conf`) | plain-HTTP fallback on the same public IP, for browsers on the same machine |
+| `configs.params."server.insecure": "true"` | plain HTTP from the node to Argo CD, so no certificate is needed |
 
-Read the current tunnel URL (it changes when the service restarts):
+A Cloudflare Tunnel (`cloudflared.service`, `ansible/files/setup-cloudflared.sh`)
+is installed as well, for an `https://` URL; read it with
+`journalctl -u cloudflared --no-pager -o cat | grep -o 'https://[a-z0-9-]*\.trycloudflare\.com' | tail -1`.
 
-```bash
-journalctl -u cloudflared --no-pager -o cat | grep -o 'https://[a-z0-9-]*\.trycloudflare\.com' | tail -1
-```
+Both names cost nothing: the public-IP quota is 3 and this uses the last free
+slot (Jenkins app IP, NAT gateway, Argo CD IP).
 
 **AWS equivalent:** an ALB in front of the Argo CD service, or an SSH tunnel
 through the bastion.
