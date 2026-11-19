@@ -1,6 +1,20 @@
-# Ingress for the frontend microservice. The NGINX ingress controller has to
-# be installed on the cluster first:
+# Ingress for the frontend microservice. The NGINX ingress controller has to be
+# installed on the cluster first.
 #
+# AKS: install it with an INTERNAL load balancer. This subscription is capped at
+# 3 public IP addresses per region and Jenkins, the NAT gateway and the AKS API
+# server already use all three, so a public ingress cannot allocate an address.
+# See ingress-nginx.azure-values.yaml:
+#
+#   helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+#   helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
+#     --namespace ingress-nginx --create-namespace \
+#     -f kubernetes/ingress-nginx.azure-values.yaml
+#
+# With an internal address the host is reachable from inside the VNet (for
+# example from the Jenkins VM) or through the port forward in the README.
+#
+# AWS equivalent (original brief):
 #   kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/aws/deploy.yaml
 #
 # The host is resolved inside the cluster, add it to /etc/hosts or to the

@@ -1,0 +1,21 @@
+---
+# Installs ArgoCD into the AKS cluster and creates the Application that syncs
+# the kubernetes/ directory of this repository.
+#
+#   ansible-playbook playbooks/argocd.yml --check
+#   ansible-playbook playbooks/argocd.yml
+#
+# The playbook runs on the control node, because the target is the cluster, not
+# the Jenkins VM: kubectl and the kubeconfig for ivolve-aks are needed here.
+# Use `az aks get-credentials -g ivolve-dev-rg -n ivolve-aks` first if the
+# context is missing.
+- name: Install ArgoCD on AKS
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  # The control node only runs kubectl; ansible.cfg enables become globally for
+  # the Jenkins playbooks, and sudo has no password here.
+  become: false
+
+  roles:
+    - role: argocd

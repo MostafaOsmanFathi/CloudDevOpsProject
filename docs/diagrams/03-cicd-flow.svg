@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1300" height="720" viewBox="0 0 1300 720"><defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5A6B7B"/></marker><marker id="arrB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0078D4"/></marker></defs><text x="40" y="44" font-family="DejaVu Sans" font-size="24" fill="#1B2733" font-weight="bold" text-anchor="start">CI/CD pipeline - Jenkins to AKS, with the AWS equivalents</text>
+<text x="40" y="72" font-family="DejaVu Sans" font-size="14" fill="#5A6B7B" font-weight="normal" text-anchor="start">Azure: Jenkins VM + ACR + ArgoCD. AWS: CodeBuild/CodePipeline + ECR + ArgoCD/EKS.</text>
+<rect x="40" y="120" width="160" height="92" rx="10" fill="#F4F7FB" stroke="#0078D4" stroke-width="2"/>
+<text x="120.0" y="154" font-family="DejaVu Sans" font-size="13" fill="#1B2733" font-weight="bold" text-anchor="middle">1. Checkout</text>
+<text x="120.0" y="178" font-family="DejaVu Sans" font-size="10" fill="#5A6B7B" font-weight="normal" text-anchor="middle">source from Git</text>
+<line x1="200" y1="166.0" x2="222" y2="166.0" stroke="#0078D4" stroke-width="2" marker-end="url(#arr)"/>
+<rect x="222" y="120" width="160" height="92" rx="10" fill="#F4F7FB" stroke="#0078D4" stroke-width="2"/>
+<text x="302.0" y="154" font-family="DejaVu Sans" font-size="13" fill="#1B2733" font-weight="bold" text-anchor="middle">2. Build image</text>
+<text x="302.0" y="178" font-family="DejaVu Sans" font-size="10" fill="#5A6B7B" font-weight="normal" text-anchor="middle">docker build per microservice</text>
+<line x1="382" y1="166.0" x2="404" y2="166.0" stroke="#0078D4" stroke-width="2" marker-end="url(#arr)"/>
+<rect x="404" y="120" width="160" height="92" rx="10" fill="#F4F7FB" stroke="#E8A33D" stroke-width="2"/>
+<text x="484.0" y="154" font-family="DejaVu Sans" font-size="13" fill="#1B2733" font-weight="bold" text-anchor="middle">3. Scan image</text>
+<text x="484.0" y="178" font-family="DejaVu Sans" font-size="10" fill="#5A6B7B" font-weight="normal" text-anchor="middle">Trivy vulnerability scan</text>
+<line x1="564" y1="166.0" x2="586" y2="166.0" stroke="#E8A33D" stroke-width="2" marker-end="url(#arr)"/>
+<rect x="586" y="120" width="160" height="92" rx="10" fill="#F4F7FB" stroke="#0078D4" stroke-width="2"/>
+<text x="666.0" y="154" font-family="DejaVu Sans" font-size="13" fill="#1B2733" font-weight="bold" text-anchor="middle">4. Push image</text>
+<text x="666.0" y="178" font-family="DejaVu Sans" font-size="10" fill="#5A6B7B" font-weight="normal" text-anchor="middle">docker push to ACR</text>
+<line x1="746" y1="166.0" x2="768" y2="166.0" stroke="#0078D4" stroke-width="2" marker-end="url(#arr)"/>
+<rect x="768" y="120" width="160" height="92" rx="10" fill="#F4F7FB" stroke="#5A6B7B" stroke-width="2"/>
+<text x="848.0" y="154" font-family="DejaVu Sans" font-size="13" fill="#1B2733" font-weight="bold" text-anchor="middle">5. Delete local</text>
+<text x="848.0" y="178" font-family="DejaVu Sans" font-size="10" fill="#5A6B7B" font-weight="normal" text-anchor="middle">remove the local image</text>
+<line x1="928" y1="166.0" x2="950" y2="166.0" stroke="#5A6B7B" stroke-width="2" marker-end="url(#arr)"/>
+<rect x="950" y="120" width="160" height="92" rx="10" fill="#F4F7FB" stroke="#0078D4" stroke-width="2"/>
+<text x="1030.0" y="154" font-family="DejaVu Sans" font-size="13" fill="#1B2733" font-weight="bold" text-anchor="middle">6. Update manifests</text>
+<text x="1030.0" y="178" font-family="DejaVu Sans" font-size="10" fill="#5A6B7B" font-weight="normal" text-anchor="middle">kustomize / helm values</text>
+<line x1="1110" y1="166.0" x2="1132" y2="166.0" stroke="#0078D4" stroke-width="2" marker-end="url(#arr)"/>
+<rect x="1132" y="120" width="160" height="92" rx="10" fill="#F4F7FB" stroke="#0078D4" stroke-width="2"/>
+<text x="1212.0" y="154" font-family="DejaVu Sans" font-size="13" fill="#1B2733" font-weight="bold" text-anchor="middle">7. Push manifests</text>
+<text x="1212.0" y="178" font-family="DejaVu Sans" font-size="10" fill="#5A6B7B" font-weight="normal" text-anchor="middle">git commit + push</text>
+<text x="40" y="240" font-family="DejaVu Sans" font-size="11" fill="#5A6B7B" font-weight="normal" text-anchor="start">Jenkins shared library (vars/) drives every stage; AWS equivalent: a CodePipeline with CodeBuild projects.</text>
+<rect x="40" y="280" width="400" height="120" rx="12" fill="#EAF1F9" stroke="#C7D3E0" stroke-width="1.4"/>
+<text x="60" y="314" font-family="DejaVu Sans" font-size="14" fill="#004E8C" font-weight="bold" text-anchor="start">Ansible (AWS: SSM / user-data + roles)</text>
+<text x="60" y="340" font-family="DejaVu Sans" font-size="11" fill="#5A6B7B" font-weight="normal" text-anchor="start">dynamic inventory from Azure</text>
+<text x="60" y="355" font-family="DejaVu Sans" font-size="11" fill="#5A6B7B" font-weight="normal" text-anchor="start">installs Java, Jenkins, Docker, Trivy</text>
+<text x="60" y="370" font-family="DejaVu Sans" font-size="11" fill="#5A6B7B" font-weight="normal" text-anchor="start">configures the VM once, outside Terraform</text>
+<rect x="480" y="280" width="380" height="120" rx="12" fill="#F4F7FB" stroke="#C7D3E0" stroke-width="1.4"/>
+<text x="500" y="314" font-family="DejaVu Sans" font-size="14" fill="#004E8C" font-weight="bold" text-anchor="start">Azure Container Registry  (AWS ECR)</text>
+<text x="500" y="340" font-family="DejaVu Sans" font-size="11" fill="#1B2733" font-weight="normal" text-anchor="start">ivolveacrgf7a4e.azurecr.io</text>
+<text x="500" y="355" font-family="DejaVu Sans" font-size="11" fill="#5A6B7B" font-weight="normal" text-anchor="start">one repository per microservice</text>
+<text x="500" y="370" font-family="DejaVu Sans" font-size="11" fill="#5A6B7B" font-weight="normal" text-anchor="start">pulled by AKS kubelet + Jenkins identity</text>
+<rect x="900" y="280" width="360" height="120" rx="12" fill="#F4F7FB" stroke="#C7D3E0" stroke-width="1.4"/>
+<text x="920" y="314" font-family="DejaVu Sans" font-size="14" fill="#004E8C" font-weight="bold" text-anchor="start">ArgoCD</text>
+<text x="920" y="340" font-family="DejaVu Sans" font-size="11" fill="#5A6B7B" font-weight="normal" text-anchor="start">Application CR committed to Git</text>
+<text x="920" y="355" font-family="DejaVu Sans" font-size="11" fill="#5A6B7B" font-weight="normal" text-anchor="start">auto sync + self-heal</text>
+<text x="920" y="370" font-family="DejaVu Sans" font-size="11" fill="#5A6B7B" font-weight="normal" text-anchor="start">AWS: same ArgoCD, or Flux / CodeDeploy</text>
+<line x1="240" y1="212" x2="240" y2="280" stroke="#0078D4" stroke-width="2" marker-end="url(#arr)"/>
+<text x="252" y="250" font-family="DejaVu Sans" font-size="10" fill="#5A6B7B" font-weight="normal" text-anchor="start">provisions the VM that runs these stages</text>
+<line x1="660" y1="212" x2="660" y2="280" stroke="#0078D4" stroke-width="2" marker-end="url(#arr)"/>
+<text x="672" y="250" font-family="DejaVu Sans" font-size="10" fill="#5A6B7B" font-weight="normal" text-anchor="start">push image</text>
+<line x1="860" y1="340" x2="900" y2="340" stroke="#0078D4" stroke-width="2" marker-end="url(#arr)"/>
+<text x="880" y="330" font-family="DejaVu Sans" font-size="10" fill="#5A6B7B" font-weight="bold" text-anchor="middle">images for AKS</text>
+<rect x="40" y="450" width="1220" height="230" rx="14" fill="#EAF1F9" stroke="#C7D3E0" stroke-width="1.4"/>
+<text x="64" y="486" font-family="DejaVu Sans" font-size="17" fill="#004E8C" font-weight="bold" text-anchor="start">Workloads running in AKS  (AWS EKS)</text>
+<rect x="64" y="510" width="186" height="96" rx="10" fill="#F4F7FB" stroke="#0078D4" stroke-width="2"/>
+<text x="157.0" y="548" font-family="DejaVu Sans" font-size="13" fill="#1B2733" font-weight="bold" text-anchor="middle">namespace ivolve</text>
+<text x="157.0" y="572" font-family="DejaVu Sans" font-size="10" fill="#5A6B7B" font-weight="normal" text-anchor="middle">all manifests live here</text>
+<rect x="262" y="510" width="186" height="96" rx="10" fill="#F4F7FB" stroke="#0078D4" stroke-width="2"/>
+<text x="355.0" y="548" font-family="DejaVu Sans" font-size="13" fill="#1B2733" font-weight="bold" text-anchor="middle">frontend</text>
+<text x="355.0" y="572" font-family="DejaVu Sans" font-size="10" fill="#5A6B7B" font-weight="normal" text-anchor="middle">Deployment + Service + Ingress</text>
+<rect x="460" y="510" width="186" height="96" rx="10" fill="#F4F7FB" stroke="#0078D4" stroke-width="2"/>
+<text x="553.0" y="548" font-family="DejaVu Sans" font-size="13" fill="#1B2733" font-weight="bold" text-anchor="middle">backend services</text>
+<text x="553.0" y="572" font-family="DejaVu Sans" font-size="10" fill="#5A6B7B" font-weight="normal" text-anchor="middle">auth / roadmap</text>
+<rect x="658" y="510" width="186" height="96" rx="10" fill="#F4F7FB" stroke="#004E8C" stroke-width="2"/>
+<text x="751.0" y="548" font-family="DejaVu Sans" font-size="13" fill="#1B2733" font-weight="bold" text-anchor="middle">mysql</text>
+<text x="751.0" y="572" font-family="DejaVu Sans" font-size="10" fill="#5A6B7B" font-weight="normal" text-anchor="middle">StatefulSet + headless Service</text>
+<rect x="856" y="510" width="186" height="96" rx="10" fill="#F4F7FB" stroke="#5A6B7B" stroke-width="2"/>
+<text x="949.0" y="548" font-family="DejaVu Sans" font-size="13" fill="#1B2733" font-weight="bold" text-anchor="middle">storageclass</text>
+<text x="949.0" y="572" font-family="DejaVu Sans" font-size="10" fill="#5A6B7B" font-weight="normal" text-anchor="middle">managed-csi disk for the DB</text>
+<rect x="1054" y="510" width="186" height="96" rx="10" fill="#F4F7FB" stroke="#5A6B7B" stroke-width="2"/>
+<text x="1147.0" y="548" font-family="DejaVu Sans" font-size="13" fill="#1B2733" font-weight="bold" text-anchor="middle">configmap + secret</text>
+<text x="1147.0" y="572" font-family="DejaVu Sans" font-size="10" fill="#5A6B7B" font-weight="normal" text-anchor="middle">env vars, sealed at rest</text>
+<text x="64" y="640" font-family="DejaVu Sans" font-size="11" fill="#5A6B7B" font-weight="normal" text-anchor="start">Ingress exposes the frontend; the database stays on the cluster disk provisioned by the StorageClass.</text></svg>

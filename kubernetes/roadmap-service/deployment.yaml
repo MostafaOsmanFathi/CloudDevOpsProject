@@ -37,6 +37,10 @@ spec:
           labelSelector:
             matchLabels:
               app.kubernetes.io/name: roadmap-service
+      # Pulls the private mostafaosmanfathi/* repositories from Docker Hub.
+      # Create it once: kubectl -n ivolve create secret docker-registry dockerhub ...
+      imagePullSecrets:
+        - name: dockerhub
       containers:
         - name: roadmap-service
           image: mostafaosmanfathi/roadmap-service:latest

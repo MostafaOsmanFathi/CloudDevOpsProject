@@ -6,7 +6,7 @@ tenant_id       = ""
 client_id       = ""
 # client_secret  = ""   # or use ARM_CLIENT_SECRET
 
-location            = "France Central"
+location            = "Denmark East"
 project_name        = "ivolve"
 environment         = "dev"
 resource_group_name = ""
@@ -29,11 +29,14 @@ vm_os_disk_size_gb  = 64
 
 # AKS
 aks_kubernetes_version = ""
-aks_node_vm_size        = "Standard_B2s"
-aks_node_count          = 1
-aks_max_pods       = 110
-aks_min_count           = 1
-aks_max_count           = 2
+aks_node_vm_size        = "Standard_DS3_v2" # 4 vCPUs, available for this subscription in Denmark East
+aks_node_count          = 0                # Worker nodes per pool: 0 while the 6 vCPU quota is full
+aks_max_pods            = 110
+aks_min_count           = 0
+aks_max_count           = 0
+aks_system_node_count   = 1
+aks_system_min_count    = 1
+aks_system_max_count    = 1
 aks_service_cidr        = "10.1.0.0/16"
 aks_dns_service_ip      = "10.1.0.10"
 

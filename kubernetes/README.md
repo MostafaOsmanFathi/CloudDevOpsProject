@@ -1,7 +1,9 @@
 # Kubernetes - Container Orchestration
 
-The manifests that deploy the iVolve application on the EKS cluster created by
-the Terraform `eks` module. Everything lives in the `ivolve` namespace.
+The manifests that deploy the iVolve application on the AKS cluster created by
+the Terraform `aks` module (`terraform/azure`). Everything lives in the `ivolve`
+namespace. The design was written for AWS/EKS; the Azure equivalents are noted
+where they differ.
 
 ## 1. Structure
 
@@ -10,7 +12,9 @@ kubernetes/
 ├── namespace.yaml            # The ivolve namespace
 ├── configmap.yaml            # Non sensitive environment variables
 ├── secret.yaml               # Passwords and the session key
-├── storageclass.yaml         # EBS storage class for the database
+├── storageclass.yaml         # Azure managed disk (Standard SSD) for the database
+├── regcred.yaml.example      # Template for the Docker Hub pull secret
+├── ingress-nginx.azure-values.yaml  # Ingress controller with an internal load balancer
 ├── mysql/
 │   ├── service.yaml          # Headless service that governs the StatefulSet
 │   └── statefulset.yaml      # MySQL with a persistent volume
@@ -29,29 +33,41 @@ kubernetes/
 
 ## 2. Prerequisites on the cluster
 
-Two addons have to be present before the manifests can be applied.
+**Azure Disk CSI driver** - already part of AKS, nothing to install. The
+StorageClass uses the built-in `disk.csi.azure.com` provisioner, so the MySQL
+StatefulSet can provision a managed disk. (AWS equivalent: the EBS CSI driver,
+`ebs.csi.aws.com`, with an IRSA role.)
 
-**EBS CSI driver** - the StorageClass uses the `ebs.csi.aws.com` provisioner,
-so the driver has to be installed and it needs an IAM role with the
-`AmazonEBSCSIDriverPolicy` attached (IRSA).
-
-```bash
-helm repo add aws-ebs-csi-driver https://kubernetes-sigs.github.io/aws-ebs-csi-driver
-helm upgrade --install aws-ebs-csi-driver aws-ebs-csi-driver/aws-ebs-csi-driver \
-  --namespace kube-system --set controller.serviceAccount.annotations."eks\.amazonaws\.com/role-arn"=arn:aws:iam::<account-id>:role/ebs-csi-controller-role
-```
-
-**NGINX ingress controller** - the Ingress uses the `nginx` class.
+**Docker Hub pull secret** - the three images are private repositories, so every
+pod needs a pull secret named `dockerhub` in the `ivolve` namespace. All four
+workloads already reference it through `imagePullSecrets`:
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/aws/deploy.yaml
+kubectl -n ivolve create secret docker-registry dockerhub \
+  --docker-server=https://index.docker.io/v1/ \
+  --docker-username=mostafaosmanfathi \
+  --docker-password='<DOCKERHUB_ACCESS_TOKEN>' \
+  --docker-email='<your email>'
 ```
 
-The images come from the Docker Hub repositories under the
-`mostafaosmanfathi` account. If the repositories are public, no
-`imagePullSecret` is needed; if they are private, create one as described in
-[`.github/README.md`](../.github/README.md#3-first-run) and reference it from
-each Deployment.
+Create the token at <https://app.hub.docker.com> -> Account settings -> Security
+-> Access tokens (Read access is enough). `regcred.yaml.example` is a template;
+the real secret is never committed (`kubernetes/regcred.yaml` is gitignored).
+
+**NGINX ingress controller** - optional, only needed for `Ingress/frontend`.
+Install it with an **internal** load balancer, because the subscription is
+capped at 3 public IPs per region and Jenkins, the NAT gateway and the AKS API
+server already use all three:
+
+```bash
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
+  --namespace ingress-nginx --create-namespace \
+  -f kubernetes/ingress-nginx.azure-values.yaml
+```
+
+With an internal address the ingress is reachable from inside the VNet (the
+Jenkins VM) or through `kubectl port-forward`.
 
 ## 3. Applying the manifests
 
@@ -103,7 +119,7 @@ kubectl -n ivolve create secret generic ivolve-secret \
 | -------- | ------- |
 | `Service/mysql` | Headless service, `clusterIP: None`, governing service of the StatefulSet |
 | `StatefulSet/mysql` | One replica with a `volumeClaimTemplate` of 20 Gi |
-| `StorageClass/ivolve-storage` | `gp3` EBS volumes, encrypted, `WaitForFirstConsumer` |
+| `StorageClass/ivolve-storage` | Azure managed disk, `StandardSSD_LRS`, ext4, `WaitForFirstConsumer` |
 
 The headless service gives the database a stable identity,
 `mysql.ivolve.svc.cluster.local`, which is the `DB_HOST` of the auth service.
@@ -122,8 +138,12 @@ Every microservice has a `Deployment` with two replicas and a `ClusterIP`
 | `roadmap-service` | 8080 | `mostafaosmanfathi/roadmap-service` |
 
 The replicas are spread over the availability zones with a
-`topologySpreadConstraints` on `topology.kubernetes.io/zone`, which matches the
-two node groups of the EKS cluster.
+`topologySpreadConstraints` on `topology.kubernetes.io/zone`. On this cluster the
+constraint is a no-op: the subscription is capped at 6 regional vCPUs, so the AKS
+user node pools run **0 nodes** and all six application pods plus MySQL land on
+the single `Standard_DS3_v2` system node (4 vCPU / 14 GiB). The requests total
+about 1.05 vCPU and 1.8 GiB, which fits. Raise the quota and the worker pools
+before increasing `replicas`.
 
 ### Ingress
 

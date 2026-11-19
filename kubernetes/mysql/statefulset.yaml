@@ -23,6 +23,10 @@ spec:
       securityContext:
         fsGroup: 999
         fsGroupChangePolicy: OnRootMismatch
+      # Pulls the private mostafaosmanfathi/* repositories from Docker Hub.
+      # Create it once: kubectl -n ivolve create secret docker-registry dockerhub ...
+      imagePullSecrets:
+        - name: dockerhub
       containers:
         - name: mysql
           image: mysql:8.4

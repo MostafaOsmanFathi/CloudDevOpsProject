@@ -1,0 +1,39 @@
+# ArgoCD Application: syncs the kubernetes/ directory of this repository into
+# the AKS cluster. Applied by ansible/playbooks/argocd.yml, or by hand with:
+#
+#   kubectl apply -n argocd -f argocd/application.yaml
+#
+# The repository is public, so no repository credentials are required. If it
+# ever becomes private, add a repo secret in the argocd namespace and reference
+# it here through `source.repoURL` + a `configs` entry.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ivolve
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: ivolve-devops
+  # ArgoCD then removes the resources it manages when this Application is deleted.
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/MostafaOsmanFathi/CloudDevOpsProject.git
+    targetRevision: HEAD
+    path: kubernetes
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: ivolve
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m

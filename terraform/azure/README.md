@@ -37,6 +37,37 @@ azure/
 | ECR repositories | Azure Container Registry |
 | S3 remote state + DynamoDB lock table | Azure Storage account backend. The azurerm backend locks through a blob lease, so there is no separate lock table |
 
+## 1.1 Region and quota constraints
+
+The subscription is an **Azure for Students** offer with two hard limits:
+
+1. An Azure Policy (`sys.regionrestriction`) only allows resources in
+   `francecentral`, `uaenorth`, `switzerlandnorth`, `denmarkeast` and
+   `austriaeast`.
+2. The regional vCPU quota is **6** in every region.
+
+On top of that, the compute SKUs this offer may use are restricted per region.
+In `francecentral`, `uaenorth` and `switzerlandnorth` every VM family that has a
+non-zero vCPU quota (B, Dv2/Dv3/Dv4, E, F, G, L, NC/NV) is reported as
+`NotAvailableForSubscription`, so no VM can be created there at all. The first
+region where both the Jenkins VM size and an AKS-capable size are available is
+**Denmark East**, which is why `location` defaults to it.
+
+Within 6 vCPUs the layout is:
+
+| Resource | Size | vCPUs |
+| --- | --- | --- |
+| Jenkins VM | `Standard_B2s` | 2 |
+| AKS system pool (1 node) | `Standard_DS3_v2` | 4 |
+| AKS user pools | `Standard_DS3_v2`, 0 nodes | 0 |
+| **Total** | | **6** |
+
+The user node pools stay empty on purpose: an AKS system pool needs a non-B SKU
+of at least 4 vCPUs, so there is no room left for a worker node. To run the
+application on dedicated workers, request a vCPU quota increase (Azure for
+Students may not approve one) or lower the system pool and accept a single
+availability zone. Then raise `aks_node_count` and `aks_max_count` together.
+
 ## 2. Azure authentication
 
 **The credentials never go into the Terraform files.** Pick one of the options

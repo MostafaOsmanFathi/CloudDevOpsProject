@@ -90,6 +90,22 @@ resource "azurerm_network_security_rule" "jenkins_ui" {
   destination_address_prefix  = "*"
 }
 
+# Port 80 is used by nginx as the public entry point to the application; the
+# browser hits the Jenkins VM's public IP and nginx proxies into the cluster.
+resource "azurerm_network_security_rule" "jenkins_http" {
+  name                        = "JenkinsHttp"
+  resource_group_name         = var.resource_group_name
+  network_security_group_name = azurerm_network_security_group.jenkins.name
+  priority                    = 103
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = "80"
+  source_address_prefix       = var.admin_cidr
+  destination_address_prefix  = "*"
+}
+
 resource "azurerm_network_security_rule" "jenkins_internal" {
   name                        = "VnetInbound"
   resource_group_name         = var.resource_group_name

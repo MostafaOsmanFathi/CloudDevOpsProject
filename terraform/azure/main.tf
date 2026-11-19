@@ -62,6 +62,9 @@ module "aks" {
   max_pods                 = var.aks_max_pods
   min_count                = var.aks_min_count
   max_count                = var.aks_max_count
+  system_node_count        = var.aks_system_node_count
+  system_min_count         = var.aks_system_min_count
+  system_max_count         = var.aks_system_max_count
   service_cidr             = var.aks_service_cidr
   dns_service_ip           = var.aks_dns_service_ip
   vnet_id                  = module.network.vnet_id

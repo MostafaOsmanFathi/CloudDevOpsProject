@@ -20,7 +20,7 @@ mock_provider "azurerm" {
 
 variables {
   subscription_id = "00000000-0000-0000-0000-000000000000"
-  location        = "France Central"
+  location        = "Denmark East"
 }
 
 run "plan_is_valid" {

@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1340" height="900" viewBox="0 0 1340 900"><defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5A6B7B"/></marker><marker id="arrB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0078D4"/></marker></defs><text x="40" y="44" font-family="DejaVu Sans" font-size="24" fill="#1B2733" font-weight="bold" text-anchor="start">iVolve DevOps Project - Azure infrastructure</text>
+<text x="40" y="72" font-family="DejaVu Sans" font-size="14" fill="#5A6B7B" font-weight="normal" text-anchor="start">The design was written for AWS; every Azure resource below is labelled with its AWS equivalent. Deployed in Denmark East (Azure for Students).</text>
+<rect x="40" y="104" width="210" height="84" rx="12" fill="#EAF1F9" stroke="#C7D3E0" stroke-width="1.4"/>
+<text x="145" y="140" font-family="DejaVu Sans" font-size="16" fill="#1B2733" font-weight="bold" text-anchor="middle">Users / Internet</text>
+<text x="145" y="162" font-family="DejaVu Sans" font-size="11" fill="#5A6B7B" font-weight="normal" text-anchor="middle">SSH 22 - Jenkins UI 8080</text>
+<rect x="290" y="104" width="220" height="84" rx="12" fill="#F4F7FB" stroke="#C7D3E0" stroke-width="1.4"/>
+<text x="400" y="138" font-family="DejaVu Sans" font-size="15" fill="#1B2733" font-weight="bold" text-anchor="middle">Developer / CI</text>
+<text x="400" y="160" font-family="DejaVu Sans" font-size="11" fill="#5A6B7B" font-weight="normal" text-anchor="middle">git push - kubectl - az</text>
+<rect x="550" y="104" width="220" height="84" rx="12" fill="#F4F7FB" stroke="#C7D3E0" stroke-width="1.4"/>
+<text x="660" y="138" font-family="DejaVu Sans" font-size="15" fill="#1B2733" font-weight="bold" text-anchor="middle">Git repository</text>
+<text x="660" y="160" font-family="DejaVu Sans" font-size="11" fill="#5A6B7B" font-weight="normal" text-anchor="middle">AWS: CodeCommit / GitHub</text>
+<rect x="830" y="104" width="250" height="84" rx="12" fill="#F4F7FB" stroke="#C7D3E0" stroke-width="1.4"/>
+<text x="955" y="138" font-family="DejaVu Sans" font-size="15" fill="#1B2733" font-weight="bold" text-anchor="middle">ArgoCD</text>
+<text x="955" y="160" font-family="DejaVu Sans" font-size="11" fill="#5A6B7B" font-weight="normal" text-anchor="middle">watches Git, syncs manifests</text>
+<rect x="40" y="262" width="330" height="200" rx="12" fill="#F4F7FB" stroke="#C7D3E0" stroke-width="1.4"/>
+<text x="60" y="296" font-family="DejaVu Sans" font-size="17" fill="#004E8C" font-weight="bold" text-anchor="start">Jenkins server</text>
+<text x="60" y="322" font-family="DejaVu Sans" font-size="13" fill="#1B2733" font-weight="bold" text-anchor="start">Azure Virtual Machine  (AWS EC2)</text>
+<text x="60" y="340" font-family="DejaVu Sans" font-size="12" fill="#1B2733" font-weight="normal" text-anchor="start">Standard_B2s - 2 vCPU - 4 GiB</text>
+<text x="60" y="356" font-family="DejaVu Sans" font-size="12" fill="#1B2733" font-weight="normal" text-anchor="start">Ubuntu 22.04 - 10.0.0.4</text>
+<text x="60" y="372" font-family="DejaVu Sans" font-size="12" fill="#1B2733" font-weight="normal" text-anchor="start">public IP 9.205.91.181</text>
+<text x="60" y="388" font-family="DejaVu Sans" font-size="12" fill="#1B2733" font-weight="normal" text-anchor="start">user-assigned identity -&gt; AcrPull</text>
+<text x="60" y="404" font-family="DejaVu Sans" font-size="11" fill="#5A6B7B" font-weight="normal" text-anchor="start">Ansible installs Java, Jenkins, Docker, Trivy</text>
+<rect x="440" y="262" width="330" height="200" rx="12" fill="#F4F7FB" stroke="#C7D3E0" stroke-width="1.4"/>
+<text x="460" y="296" font-family="DejaVu Sans" font-size="17" fill="#004E8C" font-weight="bold" text-anchor="start">Container registry</text>
+<text x="460" y="322" font-family="DejaVu Sans" font-size="13" fill="#1B2733" font-weight="bold" text-anchor="start">Azure Container Registry  (AWS ECR)</text>
+<text x="460" y="340" font-family="DejaVu Sans" font-size="12" fill="#1B2733" font-weight="normal" text-anchor="start">ivolveacrgf7a4e.azurecr.io</text>
+<text x="460" y="356" font-family="DejaVu Sans" font-size="12" fill="#1B2733" font-weight="normal" text-anchor="start">SKU Standard - retention 7 days</text>
+<text x="460" y="372" font-family="DejaVu Sans" font-size="12" fill="#1B2733" font-weight="normal" text-anchor="start">pulled by the AKS kubelet identity</text>
+<text x="460" y="388" font-family="DejaVu Sans" font-size="12" fill="#1B2733" font-weight="normal" text-anchor="start">and by the Jenkins VM identity</text>
+<text x="460" y="404" font-family="DejaVu Sans" font-size="11" fill="#5A6B7B" font-weight="normal" text-anchor="start">AWS: ECR repositories per microservice</text>
+<rect x="830" y="262" width="470" height="200" rx="12" fill="#F4F7FB" stroke="#C7D3E0" stroke-width="1.4"/>
+<text x="850" y="296" font-family="DejaVu Sans" font-size="17" fill="#004E8C" font-weight="bold" text-anchor="start">Kubernetes cluster</text>
+<text x="850" y="322" font-family="DejaVu Sans" font-size="13" fill="#1B2733" font-weight="bold" text-anchor="start">Azure Kubernetes Service  (AWS EKS)</text>
+<text x="850" y="340" font-family="DejaVu Sans" font-size="12" fill="#1B2733" font-weight="normal" text-anchor="start">ivolve-aks - Kubernetes v1.36 - Azure CNI</text>
+<text x="850" y="356" font-family="DejaVu Sans" font-size="12" fill="#1B2733" font-weight="normal" text-anchor="start">system pool: Standard_DS3_v2 x 1 node (4 vCPU)</text>
+<text x="850" y="372" font-family="DejaVu Sans" font-size="12" fill="#1B2733" font-weight="normal" text-anchor="start">user1 / user2 pools: 0 nodes (quota exhausted)</text>
+<text x="850" y="388" font-family="DejaVu Sans" font-size="12" fill="#1B2733" font-weight="normal" text-anchor="start">egress via the NAT gateway, no extra public IP</text>
+<text x="850" y="404" font-family="DejaVu Sans" font-size="11" fill="#5A6B7B" font-weight="normal" text-anchor="start">node resources: MC_ivolve-dev-rg_ivolve-aks_denmarkeast</text>
+<rect x="40" y="520" width="1260" height="330" rx="14" fill="#EAF1F9" stroke="#C7D3E0" stroke-width="1.4"/>
+<text x="64" y="556" font-family="DejaVu Sans" font-size="17" fill="#004E8C" font-weight="bold" text-anchor="start">Network - Azure Virtual Network  (AWS VPC)   10.0.0.0/16</text>
+<text x="64" y="580" font-family="DejaVu Sans" font-size="11" fill="#5A6B7B" font-weight="normal" text-anchor="start">Subnets (AWS subnets) - one pair per availability zone. Network Security Groups are the AWS Security Groups; there is no separate NACL, NSGs are stateful.</text>
+<rect x="64" y="610" width="250" height="60" rx="7" fill="#0078D4" stroke="#0078D4" stroke-width="0"/><text x="189.0" y="638.0" font-family="DejaVu Sans" font-size="13" fill="#FFFFFF" font-weight="bold" text-anchor="middle">public-subnet-1</text>
+<text x="189.0" y="656.0" font-family="DejaVu Sans" font-size="11" fill="#FFFFFF" font-weight="normal" text-anchor="middle">10.0.0.0/24 - Jenkins NIC 10.0.0.4</text>
+<rect x="334" y="610" width="250" height="60" rx="7" fill="#0078D4" stroke="#0078D4" stroke-width="0"/><text x="459.0" y="638.0" font-family="DejaVu Sans" font-size="13" fill="#FFFFFF" font-weight="bold" text-anchor="middle">public-subnet-2</text>
+<text x="459.0" y="656.0" font-family="DejaVu Sans" font-size="11" fill="#FFFFFF" font-weight="normal" text-anchor="middle">10.0.1.0/24 - spare</text>
+<rect x="64" y="690" width="250" height="60" rx="7" fill="#004E8C" stroke="#004E8C" stroke-width="0"/><text x="189.0" y="718.0" font-family="DejaVu Sans" font-size="13" fill="#FFFFFF" font-weight="bold" text-anchor="middle">private-subnet-1</text>
+<text x="189.0" y="736.0" font-family="DejaVu Sans" font-size="11" fill="#FFFFFF" font-weight="normal" text-anchor="middle">10.0.10.0/24 - AKS system node</text>
+<rect x="334" y="690" width="250" height="60" rx="7" fill="#004E8C" stroke="#004E8C" stroke-width="0"/><text x="459.0" y="718.0" font-family="DejaVu Sans" font-size="13" fill="#FFFFFF" font-weight="bold" text-anchor="middle">private-subnet-2</text>
+<text x="459.0" y="736.0" font-family="DejaVu Sans" font-size="11" fill="#FFFFFF" font-weight="normal" text-anchor="middle">10.0.11.0/24 - AKS user2</text>
+<rect x="620" y="610" width="280" height="60" rx="7" fill="#7B4F00" stroke="#7B4F00" stroke-width="0"/><text x="760.0" y="638.0" font-family="DejaVu Sans" font-size="12" fill="#FFFFFF" font-weight="bold" text-anchor="middle">NAT Gateway  (same name in AWS)</text>
+<text x="760.0" y="654.0" font-family="DejaVu Sans" font-size="10" fill="#FFFFFF" font-weight="normal" text-anchor="middle">public IP 9.205.92.29 - egress only</text>
+<rect x="620" y="690" width="280" height="60" rx="7" fill="#444444" stroke="#444444" stroke-width="0"/><text x="760.0" y="718.0" font-family="DejaVu Sans" font-size="12" fill="#FFFFFF" font-weight="bold" text-anchor="middle">Network Security Groups  (AWS SGs)</text>
+<text x="760.0" y="734.0" font-family="DejaVu Sans" font-size="10" fill="#FFFFFF" font-weight="normal" text-anchor="middle">stateful inbound rules per subnet</text>
+<text x="930" y="622" font-family="DejaVu Sans" font-size="13" fill="#D13438" font-weight="bold" text-anchor="start">Why the region changed</text>
+<text x="930" y="640" font-family="DejaVu Sans" font-size="11" fill="#5A6B7B" font-weight="normal" text-anchor="start">francecentral / uaenorth / switzerlandnorth:</text>
+<text x="930" y="655" font-family="DejaVu Sans" font-size="11" fill="#5A6B7B" font-weight="normal" text-anchor="start">every VM family with quota is</text>
+<text x="930" y="670" font-family="DejaVu Sans" font-size="11" fill="#5A6B7B" font-weight="normal" text-anchor="start">NotAvailableForSubscription.</text>
+<text x="930" y="685" font-family="DejaVu Sans" font-size="11" fill="#5A6B7B" font-weight="normal" text-anchor="start">Denmark East has deployable SKUs.</text>
+<text x="930" y="712" font-family="DejaVu Sans" font-size="13" fill="#107C10" font-weight="bold" text-anchor="start">Budgets</text>
+<text x="930" y="730" font-family="DejaVu Sans" font-size="11" fill="#5A6B7B" font-weight="normal" text-anchor="start">vCPU:  Jenkins 2 + AKS system 4 = 6 / 6</text>
+<text x="930" y="745" font-family="DejaVu Sans" font-size="11" fill="#5A6B7B" font-weight="normal" text-anchor="start">public IP: Jenkins + NAT + AKS API = 3 / 3</text>
+<line x1="250" y1="146" x2="290" y2="146" stroke="#5A6B7B" stroke-width="2" marker-end="url(#arr)"/>
+<line x1="510" y1="146" x2="550" y2="146" stroke="#5A6B7B" stroke-width="2" marker-end="url(#arr)"/>
+<line x1="770" y1="146" x2="830" y2="146" stroke="#0078D4" stroke-width="2" marker-end="url(#arr)"/>
+<polyline points="250,168 268,168 268,240 200,240 200,262" fill="none" stroke="#5A6B7B" stroke-width="2" marker-end="url(#arr)"/>
+<polyline points="620,188 620,226 300,226 300,262" fill="none" stroke="#5A6B7B" stroke-width="2" marker-end="url(#arr)"/>
+<line x1="370" y1="362" x2="440" y2="362" stroke="#0078D4" stroke-width="2" marker-end="url(#arr)"/>
+<line x1="955" y1="188" x2="955" y2="262" stroke="#0078D4" stroke-width="2" marker-end="url(#arr)"/>
+<polyline points="1000,462 1000,490 700,490 700,610" fill="none" stroke="#107C10" stroke-width="2" marker-end="url(#arr)"/>
+<polyline points="620,640 30,640 30,146 40,146" fill="none" stroke="#5A6B7B" stroke-width="2" marker-end="url(#arr)"/>
+<text x="640" y="632" font-family="DejaVu Sans" font-size="11" fill="#5A6B7B" font-weight="bold" text-anchor="start">egress to the internet</text>
+<text x="282" y="214" font-family="DejaVu Sans" font-size="11" fill="#5A6B7B" font-weight="bold" text-anchor="start">SSH / UI</text>
+<text x="470" y="352" font-family="DejaVu Sans" font-size="11" fill="#004E8C" font-weight="bold" text-anchor="start">docker push</text></svg>

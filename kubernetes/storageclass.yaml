@@ -1,17 +1,22 @@
-# StorageClass used by the MySQL StatefulSet. It provisions EBS volumes
-# through the AWS EBS CSI driver that is installed on the EKS cluster.
+# StorageClass used by the MySQL StatefulSet.
+#
+# Azure: the Azure Disk CSI driver provisions a managed disk. StandardSSD_LRS is
+# the cheapest option that is fast enough for a lab database; use
+# PremiumSSD_LRS (the built-in `managed-csi` class) if you need premium disks.
+# AKS already ships `managed-csi` and `managed-csi-standard`, this class only
+# pins the SKU and the filesystem.
+#
+# AWS equivalent (the original brief): provisioner ebs.csi.aws.com, type gp3.
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
   name: ivolve-storage
   labels:
     app.kubernetes.io/part-of: ivolve-devops
-provisioner: ebs.csi.aws.com
+provisioner: disk.csi.azure.com
 parameters:
-  type: gp3
-  encrypted: "true"
+  skuName: StandardSSD_LRS
   fsType: ext4
-  kmsKeyId: ""
 allowVolumeExpansion: true
 reclaimPolicy: Delete
 volumeBindingMode: WaitForFirstConsumer

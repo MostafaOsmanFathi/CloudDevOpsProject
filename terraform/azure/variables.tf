@@ -24,9 +24,9 @@ variable "client_secret" {
 }
 
 variable "location" {
-  description = "Azure region where the infrastructure is created."
+  description = "Azure region where the infrastructure is created. Denmark East is the region this subscription can deploy VMs in."
   type        = string
-  default     = "France Central"
+  default     = "Denmark East"
 }
 
 variable "project_name" {
@@ -114,9 +114,9 @@ variable "aks_kubernetes_version" {
 }
 
 variable "aks_node_vm_size" {
-  description = "Size of the AKS node pools."
+  description = "Size of the AKS node pools. Standard_DS3_v2 is available for this subscription in Denmark East."
   type        = string
-  default     = "Standard_B2s"
+  default     = "Standard_DS3_v2"
 }
 
 variable "aks_max_pods" {
@@ -126,21 +126,39 @@ variable "aks_max_pods" {
 }
 
 variable "aks_node_count" {
-  description = "Number of nodes in each node pool. One node pool per availability zone, so the total is this value multiplied by the number of availability zones."
+  description = "Number of nodes in each user node pool. One node pool per availability zone, so the total is this value multiplied by the number of availability zones. Zero keeps the worker pools empty: the regional quota is 6 vCPUs and the system pool plus the Jenkins VM already use all of them."
   type        = number
-  default     = 1
+  default     = 0
 }
 
 variable "aks_min_count" {
-  description = "Minimum number of nodes in each node pool."
+  description = "Minimum number of nodes in each user node pool."
+  type        = number
+  default     = 0
+}
+
+variable "aks_max_count" {
+  description = "Maximum number of nodes in each user node pool. Zero keeps the autoscaler from adding workers, which would exceed the 6 vCPU regional quota."
+  type        = number
+  default     = 0
+}
+
+variable "aks_system_node_count" {
+  description = "Number of nodes in the system node pool. One is enough for a lab cluster."
   type        = number
   default     = 1
 }
 
-variable "aks_max_count" {
-  description = "Maximum number of nodes in each node pool."
+variable "aks_system_min_count" {
+  description = "Minimum number of nodes in the system node pool."
   type        = number
-  default     = 2
+  default     = 1
+}
+
+variable "aks_system_max_count" {
+  description = "Maximum number of nodes in the system node pool. One keeps the cluster inside the 6 vCPU regional quota."
+  type        = number
+  default     = 1
 }
 
 variable "aks_service_cidr" {

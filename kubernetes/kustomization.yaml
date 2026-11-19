@@ -23,4 +23,5 @@ resources:
   - roadmap-service/service.yaml
   - frontend/deployment.yaml
   - frontend/service.yaml
+  - frontend/nodeport.yaml
   - frontend/ingress.yaml

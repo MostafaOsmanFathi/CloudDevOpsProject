@@ -1,0 +1,27 @@
+# Values for the Argo CD chart (argo/argo-cd 10.18.1 / Argo CD 3.6.1) on AKS.
+#
+# The chart installs the CRDs, so the raw install.yaml is not needed. The
+# remaining defaults are kept: one replica per component, the built-in Redis,
+# Dex, the application set and the notifications controller.
+# The UI is published at http://argocd.ivolve.local/ - nginx on the Jenkins VM
+# proxies to the NodePort below. Argo CD 3.x ignores server.basehref, so it is
+# served by name (a dedicated nginx vhost), not under a path prefix.
+server:
+  replicas: 1
+  service:
+    type: NodePort
+    nodePortHttps: 30443
+    externalTrafficPolicy: Local
+controller:
+  replicas: 1
+repoServer:
+  replicas: 1
+applicationSet:
+  replicas: 1
+
+# Plain HTTP from the node to Argo CD: the Cloudflare Tunnel on the Jenkins VM
+# terminates TLS, so the origin does not need a certificate (and a self-signed
+# one would fail the tunnel's origin check).
+configs:
+  params:
+    "server.insecure": "true"

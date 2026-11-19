@@ -1,0 +1,33 @@
+# Public entry point without spending one of the three regional public IPs.
+#
+# The subscription is capped at 3 public IP addresses, and Jenkins, the NAT
+# gateway and the AKS API server already use all three, so the frontend cannot
+# get a public LoadBalancer of its own. Instead the Jenkins VM (which already
+# has 9.205.91.181) reverse-proxies to this NodePort service:
+#
+#   browser -> http://9.205.91.181/ -> nginx on the Jenkins VM
+#           -> 10.0.10.4:30300 (this Service) -> frontend pods
+#
+# The node IP is private but routable from the VM, because the pods use Azure
+# CNI addresses from the VNet. The NSG of private-subnet-1 already allows
+# inbound traffic from the whole VNet.
+#
+# AWS equivalent: a public Network Load Balancer or an ALB in front of the
+# EKS service.
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-nodeport
+  namespace: ivolve
+  labels:
+    app.kubernetes.io/name: frontend
+    app.kubernetes.io/part-of: ivolve-devops
+spec:
+  type: NodePort
+  selector:
+    app.kubernetes.io/name: frontend
+  ports:
+    - name: http
+      port: 3000
+      targetPort: http
+      nodePort: 30300

@@ -1,5 +1,6 @@
 # Local environment overrides (may contain real secrets)
 .env
+kubernetes/regcred.yaml
 
 # Editor / OS files
 .idea/

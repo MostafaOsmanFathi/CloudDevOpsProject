@@ -1,0 +1,26 @@
+# Helm values for the NGINX ingress controller on AKS.
+#
+#   helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+#   helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
+#     --namespace ingress-nginx --create-namespace \
+#     -f kubernetes/ingress-nginx.azure-values.yaml
+#
+# Why an INTERNAL load balancer:
+# the subscription is limited to 3 public IP addresses per region. Jenkins,
+# the NAT gateway and the AKS API server already consume all three, so a public
+# LoadBalancer service would fail with PublicIPCountLimitReached.
+#
+# With an internal address, reach the ingress from inside the VNet (the Jenkins
+# VM) or with `kubectl port-forward`.
+#
+# AWS equivalent: the ingress-nginx chart with the default (internet-facing)
+# service, or the AWS Load Balancer Controller.
+controller:
+  service:
+    annotations:
+      service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+      # Pin the address to the private subnet that the cluster nodes use.
+      # service.beta.kubernetes.io/azure-load-balancer-internal-subnet: ivolve-private-subnet-1
+  nodeSelector:
+    kubernetes.io/os: linux
+  replicaCount: 2

@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1300" height="900" viewBox="0 0 1300 900"><defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5A6B7B"/></marker><marker id="arrB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0078D4"/></marker></defs><text x="40" y="44" font-family="DejaVu Sans" font-size="24" fill="#1B2733" font-weight="bold" text-anchor="start">Why the first applies failed - and the fixes that made it deploy</text>
+<rect x="40" y="100" width="620" height="300" rx="12" fill="#F4F7FB" stroke="#C7D3E0" stroke-width="1.4"/>
+<text x="64" y="134" font-family="DejaVu Sans" font-size="17" fill="#004E8C" font-weight="bold" text-anchor="start">1. Region policy + SKU eligibility</text>
+<text x="64" y="162" font-family="DejaVu Sans" font-size="12" fill="#1B2733" font-weight="normal" text-anchor="start">Azure Policy sys.regionrestriction allows only:</text>
+<text x="64" y="178" font-family="DejaVu Sans" font-size="11" fill="#5A6B7B" font-weight="normal" text-anchor="start">francecentral, uaenorth, switzerlandnorth, denmarkeast, austriaeast</text>
+<text x="64" y="196" font-family="DejaVu Sans" font-size="13" fill="#1B2733" font-weight="bold" text-anchor="start">francecentral</text>
+<rect x="240" y="180" width="90" height="24" rx="7" fill="#D13438" stroke="#D13438" stroke-width="0"/><text x="285.0" y="196.0" font-family="DejaVu Sans" font-size="11" fill="#FFFFFF" font-weight="bold" text-anchor="middle">blocked</text>
+<text x="345" y="196" font-family="DejaVu Sans" font-size="11" fill="#5A6B7B" font-weight="normal" text-anchor="start">B/D families = NotAvailableForSubscription</text>
+<text x="64" y="230" font-family="DejaVu Sans" font-size="13" fill="#1B2733" font-weight="bold" text-anchor="start">uaenorth</text>
+<rect x="240" y="214" width="90" height="24" rx="7" fill="#D13438" stroke="#D13438" stroke-width="0"/><text x="285.0" y="230.0" font-family="DejaVu Sans" font-size="11" fill="#FFFFFF" font-weight="bold" text-anchor="middle">blocked</text>
+<text x="345" y="230" font-family="DejaVu Sans" font-size="11" fill="#5A6B7B" font-weight="normal" text-anchor="start">same - no deployable SKU with quota</text>
+<text x="64" y="264" font-family="DejaVu Sans" font-size="13" fill="#1B2733" font-weight="bold" text-anchor="start">switzerlandnorth</text>
+<rect x="240" y="248" width="90" height="24" rx="7" fill="#D13438" stroke="#D13438" stroke-width="0"/><text x="285.0" y="264.0" font-family="DejaVu Sans" font-size="11" fill="#FFFFFF" font-weight="bold" text-anchor="middle">blocked</text>
+<text x="345" y="264" font-family="DejaVu Sans" font-size="11" fill="#5A6B7B" font-weight="normal" text-anchor="start">only 20-vCPU SKUs unrestricted</text>
+<text x="64" y="298" font-family="DejaVu Sans" font-size="13" fill="#1B2733" font-weight="bold" text-anchor="start">denmark east</text>
+<rect x="240" y="282" width="90" height="24" rx="7" fill="#107C10" stroke="#107C10" stroke-width="0"/><text x="285.0" y="298.0" font-family="DejaVu Sans" font-size="11" fill="#FFFFFF" font-weight="bold" text-anchor="middle">works</text>
+<text x="345" y="298" font-family="DejaVu Sans" font-size="11" fill="#5A6B7B" font-weight="normal" text-anchor="start">B2s, DS3_v2, D2_v2 available</text>
+<text x="64" y="332" font-family="DejaVu Sans" font-size="13" fill="#1B2733" font-weight="bold" text-anchor="start">austria east</text>
+<rect x="240" y="316" width="90" height="24" rx="7" fill="#E8A33D" stroke="#E8A33D" stroke-width="0"/><text x="285.0" y="332.0" font-family="DejaVu Sans" font-size="11" fill="#FFFFFF" font-weight="bold" text-anchor="middle">partial</text>
+<text x="345" y="332" font-family="DejaVu Sans" font-size="11" fill="#5A6B7B" font-weight="normal" text-anchor="start">B-series and Dv2 available</text>
+<text x="64" y="380" font-family="DejaVu Sans" font-size="12" fill="#107C10" font-weight="bold" text-anchor="start">Fix: moved the whole stack to Denmark East.</text>
+<text x="64" y="396" font-family="DejaVu Sans" font-size="10" fill="#5A6B7B" font-weight="normal" text-anchor="start">Verify any SKU with: az vm list-skus --location &lt;region&gt; --all</text>
+<rect x="690" y="100" width="570" height="300" rx="12" fill="#F4F7FB" stroke="#C7D3E0" stroke-width="1.4"/>
+<text x="714" y="134" font-family="DejaVu Sans" font-size="17" fill="#004E8C" font-weight="bold" text-anchor="start">2. Regional vCPU budget (6)</text>
+<rect x="714" y="180" width="520" height="40" rx="4" fill="#E9EEF4" stroke="#E9EEF4" stroke-width="0"/><rect x="714" y="180" width="520" height="40" rx="4" fill="#107C10" stroke="#107C10" stroke-width="0"/><text x="974.0" y="205.0" font-family="DejaVu Sans" font-size="16" fill="#FFFFFF" font-weight="bold" text-anchor="middle">6 / 6</text><text x="714" y="170" font-family="DejaVu Sans" font-size="13" fill="#1B2733" font-weight="bold" text-anchor="start">Total Regional vCPUs - 6 of 6 used</text>
+<text x="714" y="250" font-family="DejaVu Sans" font-size="13" fill="#1B2733" font-weight="bold" text-anchor="start">Jenkins VM  Standard_B2s</text>
+<text x="714" y="268" font-family="DejaVu Sans" font-size="12" fill="#5A6B7B" font-weight="normal" text-anchor="start">2 vCPU</text>
+<text x="714" y="282" font-family="DejaVu Sans" font-size="13" fill="#1B2733" font-weight="bold" text-anchor="start">AKS system pool  Standard_DS3_v2 x 1</text>
+<text x="714" y="300" font-family="DejaVu Sans" font-size="12" fill="#5A6B7B" font-weight="normal" text-anchor="start">4 vCPU</text>
+<text x="714" y="314" font-family="DejaVu Sans" font-size="13" fill="#1B2733" font-weight="bold" text-anchor="start">AKS user pools  user1 / user2</text>
+<text x="714" y="332" font-family="DejaVu Sans" font-size="12" fill="#5A6B7B" font-weight="normal" text-anchor="start">0 vCPU - 0 nodes</text>
+<text x="714" y="356" font-family="DejaVu Sans" font-size="11" fill="#5A6B7B" font-weight="normal" text-anchor="start">AKS needs a non-B system pool of at least 4 vCPUs, so no worker node fits.</text>
+<text x="714" y="371" font-family="DejaVu Sans" font-size="11" fill="#107C10" font-weight="normal" text-anchor="start">Raise the quota, then raise aks_node_count + aks_max_count together.</text>
+<rect x="40" y="430" width="620" height="300" rx="12" fill="#F4F7FB" stroke="#C7D3E0" stroke-width="1.4"/>
+<text x="64" y="464" font-family="DejaVu Sans" font-size="17" fill="#004E8C" font-weight="bold" text-anchor="start">3. Public IP budget (3) - the hidden blocker</text>
+<rect x="64" y="510" width="570" height="40" rx="4" fill="#E9EEF4" stroke="#E9EEF4" stroke-width="0"/><rect x="64" y="510" width="570" height="40" rx="4" fill="#E8A33D" stroke="#E8A33D" stroke-width="0"/><text x="349.0" y="535.0" font-family="DejaVu Sans" font-size="16" fill="#FFFFFF" font-weight="bold" text-anchor="middle">3 / 3</text><text x="64" y="500" font-family="DejaVu Sans" font-size="13" fill="#1B2733" font-weight="bold" text-anchor="start">Public IP Addresses - 3 of 3 after the fix</text>
+<text x="64" y="580" font-family="DejaVu Sans" font-size="13" fill="#1B2733" font-weight="bold" text-anchor="start">ivolve-jenkins-ip</text>
+<text x="64" y="598" font-family="DejaVu Sans" font-size="11" fill="#5A6B7B" font-weight="normal" text-anchor="start">Jenkins SSH + UI</text>
+<text x="64" y="612" font-family="DejaVu Sans" font-size="13" fill="#1B2733" font-weight="bold" text-anchor="start">ivolve-nat-ip-1</text>
+<text x="64" y="630" font-family="DejaVu Sans" font-size="11" fill="#5A6B7B" font-weight="normal" text-anchor="start">NAT gateway egress</text>
+<text x="64" y="644" font-family="DejaVu Sans" font-size="13" fill="#1B2733" font-weight="bold" text-anchor="start">AKS API server</text>
+<text x="64" y="662" font-family="DejaVu Sans" font-size="11" fill="#5A6B7B" font-weight="normal" text-anchor="start">control plane, 1 IP</text>
+<text x="64" y="690" font-family="DejaVu Sans" font-size="11" fill="#107C10" font-weight="normal" text-anchor="start">Fix: single_nat_gateway = true (was 2 NAT gateways)</text>
+<text x="64" y="705" font-family="DejaVu Sans" font-size="11" fill="#107C10" font-weight="normal" text-anchor="start">+ outbound_type = userAssignedNATGateway on the cluster</text>
+<rect x="690" y="430" width="570" height="300" rx="12" fill="#F4F7FB" stroke="#C7D3E0" stroke-width="1.4"/>
+<text x="714" y="464" font-family="DejaVu Sans" font-size="17" fill="#004E8C" font-weight="bold" text-anchor="start">4. Permissions and Azure consistency</text>
+<text x="714" y="494" font-family="DejaVu Sans" font-size="12" fill="#1B2733" font-weight="bold" text-anchor="start">Service principal needs:</text>
+<text x="714" y="510" font-family="DejaVu Sans" font-size="11" fill="#5A6B7B" font-weight="normal" text-anchor="start">  Contributor (subscription)</text>
+<text x="714" y="525" font-family="DejaVu Sans" font-size="11" fill="#5A6B7B" font-weight="normal" text-anchor="start">  User Access Administrator on ivolve-dev-rg</text>
+<text x="714" y="540" font-family="DejaVu Sans" font-size="11" fill="#E8A33D" font-weight="normal" text-anchor="start">Deleting the resource group deletes that grant.</text>
+<text x="714" y="555" font-family="DejaVu Sans" font-size="6" fill="#5A6B7B" font-weight="normal" text-anchor="start"></text>
+<text x="714" y="563" font-family="DejaVu Sans" font-size="12" fill="#1B2733" font-weight="bold" text-anchor="start">Azure Resource Manager read flapping:</text>
+<text x="714" y="579" font-family="DejaVu Sans" font-size="11" fill="#5A6B7B" font-weight="normal" text-anchor="start">  fresh region + fresh subscription -&gt; GETs can 404 for minutes.</text>
+<text x="714" y="594" font-family="DejaVu Sans" font-size="11" fill="#5A6B7B" font-weight="normal" text-anchor="start">  Symptoms: &#x27;SubnetNotFound&#x27;, &#x27;Root object was present, but now</text>
+<text x="714" y="609" font-family="DejaVu Sans" font-size="11" fill="#5A6B7B" font-weight="normal" text-anchor="start">  absent&#x27;. The resources exist; re-run terraform apply.</text>
+<rect x="40" y="760" width="1220" height="110" rx="12" fill="#EAF7EA" stroke="#107C10" stroke-width="2"/>
+<text x="64" y="796" font-family="DejaVu Sans" font-size="16" fill="#107C10" font-weight="bold" text-anchor="start">Result: the whole stack deploys in Denmark East</text>
+<text x="64" y="818" font-family="DejaVu Sans" font-size="12" fill="#1B2733" font-weight="normal" text-anchor="start">Jenkins VM (Standard_B2s) - ACR (ivolveacrgf7a4e) - AKS (Standard_DS3_v2 system pool) - VNet, subnets, NSGs, NAT</text>
+<text x="64" y="834" font-family="DejaVu Sans" font-size="12" fill="#1B2733" font-weight="normal" text-anchor="start">Budgets: 6 / 6 vCPUs  -  3 / 3 public IPs  -  1 NAT gateway</text></svg>

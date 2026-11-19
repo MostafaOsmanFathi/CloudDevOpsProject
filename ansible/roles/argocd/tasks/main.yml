@@ -1,0 +1,104 @@
+---
+# Install ArgoCD into the AKS cluster with Helm and point it at the kubernetes/
+# directory of this repository.
+#
+# The chart installs the CRDs itself, so the raw install.yaml is not needed.
+# helm upgrade --install is idempotent: re-running the playbook is safe.
+
+- name: Add the Argo CD chart repository
+  kubernetes.core.helm_repository:
+    name: argo
+    repo_url: "{{ argocd_repo }}"
+
+- name: Install Argo CD
+  kubernetes.core.helm:
+    name: "{{ argocd_release }}"
+    chart_ref: "{{ argocd_chart }}"
+    chart_version: "{{ argocd_chart_version }}"
+    release_namespace: "{{ argocd_namespace }}"
+    create_namespace: true
+    values_files:
+      - "{{ argocd_values_file }}"
+    wait: true
+    wait_timeout: "{{ argocd_wait_timeout }}s"
+  register: argocd_helm
+
+- name: Wait for the Argo CD deployments
+  ansible.builtin.command: >-
+    kubectl -n {{ argocd_namespace }} wait --for=condition=Available
+    deployment/{{ item }} --timeout={{ argocd_wait_timeout }}s
+  loop:
+    - argocd-server
+    - argocd-repo-server
+    - argocd-redis
+  register: argocd_wait_result
+  changed_when: false
+  until: argocd_wait_result is succeeded
+  retries: 3
+  delay: 15
+  when: not ansible_check_mode
+
+- name: Wait for the Argo CD application controller
+  # A StatefulSet has no "Available" condition, rollout status is the check.
+  ansible.builtin.command: >-
+    kubectl -n {{ argocd_namespace }} rollout status
+    statefulset/argocd-application-controller --timeout={{ argocd_wait_timeout }}s
+  register: argocd_controller_wait
+  changed_when: false
+  until: argocd_controller_wait is succeeded
+  retries: 3
+  delay: 15
+  when: not ansible_check_mode
+
+- name: Create the Argo CD Application
+  ansible.builtin.command: kubectl apply -n {{ argocd_namespace }} -f {{ argocd_app_file }}
+  register: argocd_app_result
+  changed_when: "'created' in argocd_app_result.stdout or 'configured' in argocd_app_result.stdout"
+  when: not ansible_check_mode
+
+- name: Wait for the application to sync
+  ansible.builtin.command: >-
+    kubectl -n {{ argocd_namespace }} get application {{ argocd_app_name }}
+    -o jsonpath='{.status.sync.status}'
+  register: argocd_sync_status
+  changed_when: false
+  until: argocd_sync_status.stdout == "Synced"
+  retries: 12
+  delay: 10
+  when: not ansible_check_mode
+  # A failed sync is reported, not fatal: the install itself succeeded and the
+  # cause is almost always "the Git revision does not match the cluster".
+  ignore_errors: true
+
+- name: Read the application sync error
+  ansible.builtin.command: >-
+    kubectl -n {{ argocd_namespace }} get application {{ argocd_app_name }}
+    -o jsonpath='{.status.conditions[?(@.type=="SyncError")].message}'
+  register: argocd_sync_error
+  changed_when: false
+  when: not ansible_check_mode
+
+- name: Report the application status
+  ansible.builtin.debug:
+    msg:
+      - "Application sync status: {{ argocd_sync_status.stdout | default('unknown') }}"
+      - "Sync error: {{ argocd_sync_error.stdout | default('none') }}"
+      - "Argo CD syncs the Git revision, so an uncommitted working tree stays OutOfSync."
+
+- name: Read the initial Argo CD admin password
+  ansible.builtin.shell: >-
+    kubectl -n {{ argocd_namespace }} get secret argocd-initial-admin-secret
+    -o jsonpath='{.data.password}' | base64 -d
+  register: argocd_admin_password
+  changed_when: false
+  ignore_errors: true
+
+- name: Report the result
+  ansible.builtin.debug:
+    msg:
+      - "Argo CD {{ argocd_app_version }} installed with Helm (chart {{ argocd_chart }} {{ argocd_chart_version }}) in namespace {{ argocd_namespace }}."
+      - "Application {{ argocd_app_name }}: {{ argocd_sync_status.stdout | default('unknown') }}, syncing {{ argocd_app_repo }} at path {{ argocd_app_path }}."
+      - "UI:   kubectl -n {{ argocd_namespace }} port-forward svc/argocd-server 8443:443"
+      - "URL:  https://localhost:8443 (self-signed certificate)"
+      - "User: admin"
+      - "Pass: {{ argocd_admin_password.stdout | default('(initial-admin secret not found)') }}"

@@ -1,0 +1,19 @@
+---
+# ArgoCD is installed into the AKS cluster with the official Helm chart.
+# Chart 10.18.1 ships Argo CD 3.6.1.
+argocd_chart: "argo/argo-cd"
+argocd_chart_version: "10.18.1"
+argocd_app_version: "v3.6.1"
+argocd_repo: "https://argoproj.github.io/argo-helm"
+argocd_release: "argocd"
+argocd_namespace: "argocd"
+argocd_values_file: "{{ role_path }}/files/argocd-aks-values.yaml"
+argocd_wait_timeout: 600
+
+# The Application that syncs this repository. Keep in sync with
+# argocd/application.yaml, which is the copy that is committed.
+argocd_app_file: "{{ playbook_dir }}/../../argocd/application.yaml"
+argocd_app_name: "ivolve"
+argocd_app_namespace: "ivolve"
+argocd_app_repo: "https://github.com/MostafaOsmanFathi/CloudDevOpsProject.git"
+argocd_app_path: "kubernetes"

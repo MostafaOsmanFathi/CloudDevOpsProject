@@ -37,13 +37,31 @@ variable "kubernetes_version" {
 variable "node_vm_size" {
   description = "Size of the AKS nodes."
   type        = string
-  default     = "Standard_B2s"
+  default     = "Standard_DS3_v2"
+}
+
+variable "system_node_count" {
+  description = "Number of nodes in the system node pool."
+  type        = number
+  default     = 1
+}
+
+variable "system_min_count" {
+  description = "Minimum number of nodes in the system node pool."
+  type        = number
+  default     = 1
+}
+
+variable "system_max_count" {
+  description = "Maximum number of nodes in the system node pool."
+  type        = number
+  default     = 1
 }
 
 variable "node_count" {
-  description = "Number of nodes in each node pool. The total is this value multiplied by the number of node pools."
+  description = "Number of nodes in each user node pool. The total is this value multiplied by the number of node pools."
   type        = number
-  default     = 1
+  default     = 0
 }
 
 variable "max_pods" {
@@ -53,15 +71,15 @@ variable "max_pods" {
 }
 
 variable "min_count" {
-  description = "Minimum number of nodes in each node pool."
+  description = "Minimum number of nodes in each user node pool."
   type        = number
-  default     = 1
+  default     = 0
 }
 
 variable "max_count" {
-  description = "Maximum number of nodes in each node pool."
+  description = "Maximum number of nodes in each user node pool."
   type        = number
-  default     = 2
+  default     = 0
 }
 
 variable "service_cidr" {

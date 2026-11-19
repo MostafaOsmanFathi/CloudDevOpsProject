@@ -1,0 +1,21 @@
+# Static inventory for the Azure Jenkins VM created by terraform/azure.
+#
+# The AWS inventory (aws_ec2.yml) selects instances by tag; on Azure the VM is
+# addressed directly, because there is exactly one.
+#
+#   ansible-playbook -i inventory/azure_vm.yml playbooks/argocd.yml --check
+#   ansible-playbook -i inventory/azure_vm.yml playbooks/argocd.yml
+#
+# The SSH key is the one that terraform/azure put on the VM. Install it with:
+#   az vm run-command invoke -g ivolve-dev-rg -n ivolve-jenkins-server \
+#     --command-id RunShellScript \
+#     --scripts "mkdir -p /home/azureuser/.ssh && echo '<public key>' >> /home/azureuser/.ssh/authorized_keys"
+all:
+  children:
+    jenkins:
+      hosts:
+        ivolve-jenkins-server:
+          ansible_host: 9.205.91.181
+          ansible_user: azureuser
+          ansible_ssh_private_key_file: ~/.ssh/id_ed25519
+          ansible_python_interpreter: /usr/bin/python3
