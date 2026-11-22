@@ -1,5 +1,17 @@
 # CloudDevOpsProject
 
+## Live deployment — open it here
+
+| Service | URL | Status |
+| --- | --- | --- |
+| **Application** | <http://ivolve.denmarkeast.cloudapp.azure.com/> | HTTP 200 |
+| **Argo CD** | <http://ivolve-argocd.denmarkeast.cloudapp.azure.com/> | HTTP 200 |
+| Argo CD (HTTPS) | <https://charger-compilation-haven-newport.trycloudflare.com/> | HTTP 200 |
+
+Argo CD login: user `admin`, password from
+`kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d`.
+Full details, DNS names, ports and fallbacks: [`docs/access.md`](docs/access.md).
+
 Microservices DevOps training project (NTI x iVolve). The application source
 code lives in [`src/`](./src), the AWS infrastructure in
 [`terraform/`](./terraform), the server configuration in
@@ -12,18 +24,6 @@ code lives in [`src/`](./src), the AWS infrastructure in
 | Auth Service    | Python / Flask           | 5000 |
 | Roadmap Service | Java / Spring Boot       | 8080 |
 | MySQL           | MySQL 8                  | 3306 |
-
-## Live deployment — open it here
-
-| Service | URL | Status |
-| --- | --- | --- |
-| **Application** | <http://ivolve.denmarkeast.cloudapp.azure.com/> | HTTP 200 |
-| **Argo CD** | <http://ivolve-argocd.denmarkeast.cloudapp.azure.com/> | HTTP 200 |
-| Argo CD (HTTPS) | <https://charger-compilation-haven-newport.trycloudflare.com/> | HTTP 200 |
-
-Argo CD login: user `admin`, password from
-`kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d`.
-Full details, DNS names, ports and fallbacks: [`docs/access.md`](docs/access.md).
 
 ## Requirements covered (NTI Final Project)
 

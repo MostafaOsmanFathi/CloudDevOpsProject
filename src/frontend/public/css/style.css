@@ -172,6 +172,45 @@ a:hover {
 }
 
 /* =========================
+   Deployment links
+   ========================= */
+
+.deployment-links {
+  margin-top: 24px;
+  padding: 14px 16px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.deployment-links h2 {
+  margin: 0 0 10px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.deployment-links ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.deployment-links li {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.deployment-links a {
+  word-break: break-all;
+}
+
+/* =========================
    Main Navigation
    ========================= */
 
