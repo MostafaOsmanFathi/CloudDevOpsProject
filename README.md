@@ -13,6 +13,44 @@ code lives in [`src/`](./src), the AWS infrastructure in
 | Roadmap Service | Java / Spring Boot       | 8080 |
 | MySQL           | MySQL 8                  | 3306 |
 
+## Live deployment — open it here
+
+| Service | URL | Status |
+| --- | --- | --- |
+| **Application** | <http://ivolve.denmarkeast.cloudapp.azure.com/> | HTTP 200 |
+| **Argo CD** | <http://ivolve-argocd.denmarkeast.cloudapp.azure.com/> | HTTP 200 |
+| Argo CD (HTTPS) | <https://charger-compilation-haven-newport.trycloudflare.com/> | HTTP 200 |
+
+Argo CD login: user `admin`, password from
+`kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d`.
+Full details, DNS names, ports and fallbacks: [`docs/access.md`](docs/access.md).
+
+## Requirements covered (NTI Final Project)
+
+| # | Requirement | Status | Evidence |
+| --- | --- | --- | --- |
+| 1 | GitHub repository + README | Met | this repo |
+| 2 | Docker Compose with the database | Met | [`docker-compose.yml`](docker-compose.yml) |
+| 3 | Terraform network / server / EKS / ECR + S3 backend | Met (code); Azure applied | [`terraform/`](terraform/README.md) |
+| 4 | Ansible roles + dynamic inventory | Met (code) | [`ansible/`](ansible/README.md) |
+| 5 | Kubernetes namespace, Deployments, Services, StatefulSet, StorageClass, ConfigMap/Secret, Ingress | Met | [`kubernetes/`](kubernetes/README.md) |
+| 6 | Jenkins pipeline + `vars/` shared library | Behaviour covered by GitHub Actions; named artifacts absent | [`.github/workflows`](.github/README.md), [`docs/ci-cd.md`](docs/ci-cd.md) |
+| 7 | Argo CD Application | Met | [`argocd/application.yaml`](argocd/application.yaml) |
+| 8 | Documentation | Met | [`docs/requirements.md`](docs/requirements.md) |
+
+Section-by-section evidence: [`docs/requirements.md`](docs/requirements.md).
+
+## Architecture
+
+The deployment runs on **Azure** (no AWS account was available), but the brief
+was written for AWS. Both views are documented:
+
+- [AWS-named diagrams with official AWS icons](docs/aws-architecture/README.md) —
+  start with the [animated system overview](docs/aws-architecture/01-system-overview-animated.gif)
+- [Azure-named diagrams](docs/diagrams/) — including the quota fixes and public-access path
+- [Architecture overview](docs/architecture.md) and
+  [deployment history / root causes](docs/azure-infrastructure.md)
+
 ## Running the stack locally (Docker Compose)
 
 The repository ships a [`docker-compose.yml`](./docker-compose.yml) that builds
@@ -143,3 +181,17 @@ on every pull request.
 
 Details, including how to add the secrets and create the Docker Hub
 repositories, are in [`.github/README.md`](./.github/README.md).
+
+## Documentation index
+
+| Page | Contents |
+| --- | --- |
+| [`docs/requirements.md`](docs/requirements.md) | every PDF section → task, deliverable, repo path, live evidence |
+| [`docs/setup.md`](docs/setup.md) | local and Azure rebuild instructions |
+| [`docs/architecture.md`](docs/architecture.md) | system overview and AWS↔Azure component map |
+| [`docs/access.md`](docs/access.md) | live URLs, DNS labels, ports, Argo CD login |
+| [`docs/ci-cd.md`](docs/ci-cd.md) | GitHub Actions ↔ Jenkins stage mapping, Argo CD handoff |
+| [`docs/azure-infrastructure.md`](docs/azure-infrastructure.md) | failures, root causes and fixes |
+| [`docs/aws-architecture/`](docs/aws-architecture/README.md) | AWS-named diagrams (incl. animated overview) |
+| [`docs/diagrams/`](docs/diagrams/) | Azure-named diagrams and egress animation |
+| [`tasks/Terraform/README.md`](tasks/Terraform/README.md) | 16 captioned deployment screenshots |
